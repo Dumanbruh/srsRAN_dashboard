@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>srsRAN Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;--bg2:#0d1120;--bg3:#111827;--bg4:#161d2e;
+  --border:rgba(55,138,221,0.12);--border2:rgba(55,138,221,0.25);
+  --text:#c8d4e8;--text2:#6b7a96;--text3:#3d4a60;
+  --blue:#378ADD;--blue-bg:rgba(55,138,221,0.08);
+  --green:#1D9E75;--green-bg:rgba(29,158,117,0.08);
+  --red:#E24B4A;--red-bg:rgba(226,75,74,0.08);
+  --amber:#EF9F27;--amber-bg:rgba(239,159,39,0.08);
+  --pink:#D4537E;
+  --mono:'Share Tech Mono',monospace;
+  --sans:'Exo 2',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;min-height:100vh;
+  background-image:
+    radial-gradient(ellipse at 0% 0%, rgba(55,138,221,0.03) 0%,transparent 50%),
+    radial-gradient(ellipse at 100% 100%, rgba(29,158,117,0.03) 0%,transparent 50%);
+}
+
+/* ── Layout ── */
+.layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh;}
+
+/* ── Sidebar ── */
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:1.2rem 0;}
+.sb-logo{padding:0 1.2rem 1.5rem;border-bottom:1px solid var(--border);}
+.sb-logo-text{font-family:var(--mono);font-size:18px;letter-spacing:0.1em;}
+.sb-logo-text span{color:var(--blue);}
+.sb-logo-sub{font-size:10px;color:var(--text3);letter-spacing:0.2em;text-transform:uppercase;margin-top:4px;}
+.sb-section{padding:1rem 1.2rem 0.5rem;font-size:9px;color:var(--text3);letter-spacing:0.2em;text-transform:uppercase;}
+.sb-link{display:flex;align-items:center;gap:10px;padding:8px 1.2rem;color:var(--text2);cursor:pointer;
+  font-size:12px;transition:all 0.15s;border-left:2px solid transparent;}
+.sb-link:hover{color:var(--text);background:var(--bg3);}
+.sb-link.active{color:var(--blue);border-left-color:var(--blue);background:var(--blue-bg);}
+.sb-link .icon{width:14px;height:14px;opacity:0.7;}
+.sb-bottom{margin-top:auto;padding:1rem 1.2rem;border-top:1px solid var(--border);}
+.sb-user{display:flex;align-items:center;gap:8px;}
+.sb-avatar{width:28px;height:28px;border-radius:50%;background:var(--blue-bg);border:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--blue);font-family:var(--mono);}
+.sb-uname{font-size:12px;color:var(--text);}
+.sb-role{font-size:10px;color:var(--text3);}
+.sb-logout{display:block;margin-top:10px;font-size:11px;color:var(--text3);text-decoration:none;
+  padding:6px 10px;border:1px solid var(--border);border-radius:3px;text-align:center;transition:all 0.15s;}
+.sb-logout:hover{color:var(--red);border-color:rgba(226,75,74,0.3);}
+
+/* ── Main area ── */
+.main{overflow:auto;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;
+  border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:10;}
+.page-title{font-size:14px;font-weight:600;color:var(--text);}
+.status-row{display:flex;gap:8px;}
+.badge{font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid;display:flex;align-items:center;gap:5px;font-family:var(--mono);}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;}
+.badge.ok{background:var(--green-bg);color:var(--green);border-color:rgba(29,158,117,0.3);}
+.badge.ok::before{background:var(--green);}
+.badge.err{background:var(--red-bg);color:var(--red);border-color:rgba(226,75,74,0.3);}
+.badge.err::before{background:var(--red);animation:blink 1.2s infinite;}
+.badge.warn{background:var(--amber-bg);color:var(--amber);border-color:rgba(239,159,39,0.3);}
+.badge.warn::before{background:var(--amber);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+
+.content{padding:1.5rem;}
+
+/* ── Time range toolbar ── */
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:1.2rem;flex-wrap:wrap;}
+.tr-label{font-size:10px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;}
+.tr-btn{padding:5px 12px;border-radius:3px;border:1px solid var(--border);background:var(--bg3);
+  color:var(--text2);cursor:pointer;font-family:var(--mono);font-size:11px;transition:all 0.15s;}
+.tr-btn:hover{border-color:var(--border2);color:var(--text);}
+.tr-btn.active{background:var(--blue-bg);color:var(--blue);border-color:rgba(55,138,221,0.4);}
+.tr-sep{width:1px;height:20px;background:var(--border);}
+.tr-metric-select{padding:5px 10px;border-radius:3px;border:1px solid var(--border);background:var(--bg3);
+  color:var(--text);font-family:var(--mono);font-size:11px;outline:none;cursor:pointer;}
+.tr-interval-select{padding:5px 10px;border-radius:3px;border:1px solid var(--border);background:var(--bg3);
+  color:var(--text);font-family:var(--mono);font-size:11px;outline:none;cursor:pointer;}
+
+.btn-export{padding:5px 12px;border-radius:3px;border:1px solid var(--border);background:transparent;
+  color:var(--text2);font-family:var(--sans);font-size:11px;cursor:pointer;transition:all 0.15s;}
+.btn-export:hover{border-color:var(--green);color:var(--green);}
+
+/* ── Metric cards ── */
+.metrics-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:1.2rem;}
+.mcard{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1rem;position:relative;overflow:hidden;}
+.mcard::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.mcard.blue::after{background:linear-gradient(90deg,transparent,var(--blue),transparent);}
+.mcard.green::after{background:linear-gradient(90deg,transparent,var(--green),transparent);}
+.mcard.amber::after{background:linear-gradient(90deg,transparent,var(--amber),transparent);}
+.mcard.pink::after{background:linear-gradient(90deg,transparent,var(--pink),transparent);}
+.mc-label{font-size:9px;color:var(--text3);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px;}
+.mc-val{font-family:var(--mono);font-size:22px;color:var(--text);}
+.mc-unit{font-size:11px;color:var(--text3);margin-left:2px;}
+.mc-delta{font-size:10px;margin-top:4px;}
+.mc-delta.up{color:var(--green);}
+.mc-delta.dn{color:var(--red);}
+
+/* ── Charts ── */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1rem;}
+.panel-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;}
+.panel-title{font-size:10px;color:var(--text3);letter-spacing:0.12em;text-transform:uppercase;}
+.legend{display:flex;gap:10px;flex-wrap:wrap;}
+.leg-item{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text2);font-family:var(--mono);}
+.leg-dot{width:8px;height:3px;border-radius:1px;}
+.chart-wrap{position:relative;height:180px;}
+.chart-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:var(--text3);font-family:var(--mono);}
+
+/* ── UE Cards ── */
+.ue-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem;}
+.ue-card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:0.85rem;
+  transition:border-color 0.2s,opacity 0.2s;}
+.ue-card.active{border-color:rgba(29,158,117,0.25);}
+.ue-card.inactive{opacity:0.4;}
+.ue-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.ue-name{font-family:var(--mono);font-size:15px;font-weight:600;}
+.toggle{padding:3px 10px;border-radius:10px;border:1px solid var(--border2);background:transparent;
+  color:var(--text2);cursor:pointer;font-family:var(--mono);font-size:10px;transition:all 0.15s;}
+.toggle.on{background:var(--green-bg);color:var(--green);border-color:rgba(29,158,117,0.4);}
+.viewer-badge{font-size:10px;color:var(--text3);font-family:var(--mono);}
+.ue-stats{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px;}
+.ue-stat{background:var(--bg3);border-radius:3px;padding:5px 8px;}
+.ue-stat-l{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;}
+.ue-stat-v{font-family:var(--mono);font-size:14px;color:var(--text);}
+.ue-stat-u{font-size:9px;color:var(--text3);}
+.bar-row{margin-bottom:5px;}
+.bar-lbl{display:flex;justify-content:space-between;font-size:9px;color:var(--text3);margin-bottom:3px;}
+.bar-track{height:2px;background:var(--bg4);border-radius:1px;}
+.bar-fill{height:100%;border-radius:1px;transition:width 0.5s;}
+.slider-row{display:flex;align-items:center;gap:8px;margin-top:8px;}
+.sl-label{font-size:9px;color:var(--text3);text-transform:uppercase;min-width:50px;}
+input[type=range]{flex:1;height:2px;background:var(--bg4);appearance:none;outline:none;border-radius:1px;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{appearance:none;width:10px;height:10px;border-radius:50%;background:var(--blue);cursor:pointer;}
+input[type=range]:disabled{opacity:0.3;cursor:default;}
+.sl-val{font-family:var(--mono);font-size:10px;color:var(--text2);min-width:35px;text-align:right;}
+
+/* ── Noise panel ── */
+.noise-panel{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1rem;margin-bottom:1rem;}
+.noise-hd{font-size:10px;color:var(--text3);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.75rem;display:flex;align-items:center;justify-content:space-between;}
+.noise-btns{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:10px;}
+.nbtn{padding:7px 4px;border-radius:3px;border:1px solid var(--border);background:var(--bg3);
+  color:var(--text2);cursor:pointer;font-family:var(--mono);font-size:10px;text-align:center;transition:all 0.15s;}
+.nbtn:hover{border-color:var(--border2);color:var(--text);}
+.nbtn.active{background:var(--amber-bg);color:var(--amber);border-color:rgba(239,159,39,0.4);}
+.nbtn:disabled{opacity:0.3;cursor:default;}
+.noise-intensity{display:flex;align-items:center;gap:10px;}
+.ni-label{font-size:10px;color:var(--text3);min-width:65px;text-transform:uppercase;letter-spacing:0.1em;}
+
+/* ── Bottom ── */
+.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.log-panel{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1rem;}
+.log-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;}
+.log-title{font-size:10px;color:var(--text3);letter-spacing:0.12em;text-transform:uppercase;}
+.log-cnt{font-size:10px;color:var(--text3);font-family:var(--mono);}
+.log-box{height:150px;overflow-y:auto;}
+.log-box::-webkit-scrollbar{width:3px;}
+.log-box::-webkit-scrollbar-track{background:transparent;}
+.log-box::-webkit-scrollbar-thumb{background:var(--bg4);}
+.log-line{padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:10px;display:flex;gap:8px;font-family:var(--mono);}
+.log-ts{color:var(--text3);min-width:58px;flex-shrink:0;}
+.log-msg{color:var(--text2);}
+.log-line.ok .log-msg{color:var(--green);}
+.log-line.warn .log-msg{color:var(--amber);}
+.log-line.err .log-msg{color:var(--red);}
+.cmd-panel{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1rem;}
+.cmd-title{font-size:10px;color:var(--text3);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.75rem;}
+.cmd-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.cmd-btn{padding:9px;border-radius:3px;border:1px solid var(--border);background:var(--bg3);
+  color:var(--text2);cursor:pointer;font-family:var(--sans);font-size:11px;text-align:center;transition:all 0.15s;}
+.cmd-btn:hover{background:var(--bg4);border-color:var(--border2);color:var(--text);}
+.cmd-btn.danger:hover{background:var(--red-bg);color:var(--red);border-color:rgba(226,75,74,0.3);}
+.cmd-btn:disabled{opacity:0.3;cursor:default;}
+
+/* viewer mode */
+.admin-only{display:block;}
+body.viewer .admin-only{display:none !important;}
+</style>
+</head>
+<body class="{% if not is_admin %}viewer{% endif %}">
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-text">srs<span>RAN</span></div>
+      <div class="sb-logo-sub">Control Dashboard</div>
+    </div>
+    <div class="sb-section">Навигация</div>
+    <div class="sb-link active">
+      <svg class="icon" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+      Дашборд
+    </div>
+    <div class="sb-section">Данные</div>
+    <div class="sb-link" onclick="scrollToCharts()">
+      <svg class="icon" viewBox="0 0 16 16" fill="currentColor"><polyline points="1,12 5,7 9,10 15,3" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+      Графики
+    </div>
+    <div class="sb-link" onclick="scrollToUEs()">
+      <svg class="icon" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="5" y1="13" x2="5" y2="15" stroke="currentColor" stroke-width="1.5"/><line x1="11" y1="13" x2="11" y2="15" stroke="currentColor" stroke-width="1.5"/></svg>
+      UE панели
+    </div>
+    <div class="sb-link" onclick="exportCSV()">
+      <svg class="icon" viewBox="0 0 16 16" fill="currentColor"><path d="M3 2h7l3 3v9H3V2z" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="10,2 10,5 13,5" stroke="currentColor" stroke-width="1" fill="none"/><line x1="6" y1="9" x2="10" y2="9" stroke="currentColor" stroke-width="1.5"/></svg>
+      Экспорт CSV
+    </div>
+    <div class="sb-bottom">
+      <div class="sb-user">
+        <div class="sb-avatar">{{ user.username|first|upper }}</div>
+        <div>
+          <div class="sb-uname">{{ user.username }}</div>
+          <div class="sb-role">{{ user.role }}</div>
+        </div>
+      </div>
+      <a href="/logout/" class="sb-logout">Выйти</a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="page-title">Обзор сети</div>
+      <div class="status-row">
+        <div class="badge err" id="badge-influx">InfluxDB</div>
+        <div class="badge err" id="badge-gnr">GNU Radio</div>
+        <div class="badge err" id="badge-gnb">gNB</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Time range toolbar -->
+      <div class="toolbar">
+        <span class="tr-label">Период</span>
+        <button class="tr-btn" onclick="setRange('5m')">5м</button>
+        <button class="tr-btn" onclick="setRange('15m')">15м</button>
+        <button class="tr-btn active" id="tr-30m" onclick="setRange('30m')">30м</button>
+        <button class="tr-btn" onclick="setRange('1h')">1ч</button>
+        <button class="tr-btn" onclick="setRange('6h')">6ч</button>
+        <button class="tr-btn" onclick="setRange('24h')">24ч</button>
+        <div class="tr-sep"></div>
+        <span class="tr-label">Метрика 1</span>
+        <select class="tr-metric-select" id="sel-metric" onchange="loadHistory()">
+          <option value="dl">DL Throughput</option>
+          <option value="ul">UL Throughput</option>
+          <option value="mcs">DL MCS</option>
+          <option value="ul_mcs">UL MCS</option>
+          <option value="bler_dl">DL BLER</option>
+          <option value="bler_ul">UL BLER</option>
+        </select>
+        <div class="tr-sep"></div>
+        <span class="tr-label">Метрика 2</span>
+        <select class="tr-metric-select" id="sel-metric2" onchange="loadHistory2()">
+          <option value="ul">UL Throughput</option>
+          <option value="dl">DL Throughput</option>
+          <option value="mcs">DL MCS</option>
+          <option value="ul_mcs">UL MCS</option>
+          <option value="bler_dl">DL BLER</option>
+          <option value="bler_ul">UL BLER</option>
+        </select>
+        <div class="tr-sep"></div>
+        <select class="tr-interval-select" id="sel-interval" onchange="loadHistory();loadHistory2()">
+          <option value="5s">5с</option>
+          <option value="10s">10с</option>
+          <option value="30s" selected>30с</option>
+          <option value="1m">1м</option>
+          <option value="5m">5м</option>
+        </select>
+        <button class="btn-export" onclick="exportCSV()">↓ CSV</button>
+      </div>
+
+      <!-- Metric cards -->
+      <div class="metrics-grid">
+        <div class="mcard blue"><div class="mc-label">Total DL</div><div class="mc-val" id="m-dl">—<span class="mc-unit">kb/s</span></div></div>
+        <div class="mcard blue"><div class="mc-label">Total UL</div><div class="mc-val" id="m-ul">—<span class="mc-unit">kb/s</span></div></div>
+        <div class="mcard green"><div class="mc-label">Активных UE</div><div class="mc-val" id="m-active">—<span class="mc-unit">/4</span></div></div>
+        <div class="mcard amber"><div class="mc-label">Avg PUSCH SNR</div><div class="mc-val" id="m-snr">—<span class="mc-unit">dB</span></div></div>
+        <div class="mcard pink"><div class="mc-label">Avg NOK%</div><div class="mc-val" id="m-nok">—<span class="mc-unit">%</span></div></div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-grid" id="charts-anchor">
+        <div class="panel">
+          <div class="panel-hd">
+            <span class="panel-title" id="chart-main-title">DL Throughput</span>
+            <div class="legend" id="legend-main"></div>
+          </div>
+          <div class="chart-wrap">
+            <div class="chart-loading" id="loading-main" style="display:none">Загрузка...</div>
+            <canvas id="chart-main"></canvas>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-hd">
+            <span class="panel-title" id="chart-main2-title">UL Throughput</span>
+            <div class="legend" id="legend-main2"></div>
+          </div>
+          <div class="chart-wrap">
+            <div class="chart-loading" id="loading-main2" style="display:none">Загрузка...</div>
+            <canvas id="chart-main2"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- UE Cards -->
+      <div class="ue-grid" id="ues-anchor"></div>
+
+      <!-- Noise panel (admin only) -->
+      <div class="noise-panel admin-only">
+        <div class="noise-hd">
+          <span>Имитация помех канала</span>
+          <span style="font-size:10px;color:var(--text3);font-family:var(--mono)" id="noise-status">Чистый канал</span>
+        </div>
+        <div class="noise-btns">
+          <button class="nbtn active" id="n-none" onclick="setNoise('none')">Чистый</button>
+          <button class="nbtn" id="n-awgn" onclick="setNoise('awgn')">AWGN</button>
+          <button class="nbtn" id="n-fading" onclick="setNoise('fading')">Fading</button>
+          <button class="nbtn" id="n-shadow" onclick="setNoise('shadow')">Shadow</button>
+          <button class="nbtn" id="n-doppler" onclick="setNoise('doppler')">Doppler</button>
+          <button class="nbtn" id="n-interf" onclick="setNoise('interf')">Interf.</button>
+        </div>
+        <div class="noise-intensity">
+          <span class="ni-label">Интенсивность</span>
+          <input type="range" min="0" max="30" value="0" step="1" id="noise-sl" oninput="updateNoiseLevel(this.value)">
+          <span class="sl-val" id="noise-v" style="min-width:45px">0 dB</span>
+        </div>
+      </div>
+
+      <!-- Bottom -->
+      <div class="bottom-grid">
+        <div class="log-panel">
+          <div class="log-hd">
+            <span class="log-title">Журнал событий</span>
+            <span class="log-cnt" id="log-cnt">0 событий</span>
+          </div>
+          <div class="log-box" id="log-box"></div>
+        </div>
+        <div class="cmd-panel">
+          <div class="cmd-title">Быстрые команды</div>
+          <div class="cmd-grid">
+            <button class="cmd-btn admin-only" onclick="setAllUEs(true)">Включить все UE</button>
+            <button class="cmd-btn danger admin-only" onclick="setAllUEs(false)">Отключить все UE</button>
+            <button class="cmd-btn admin-only" onclick="resetPathloss()">Сброс pathloss</button>
+            <button class="cmd-btn admin-only" onclick="setNoise('none')">Очистить помехи</button>
+            <button class="cmd-btn" onclick="loadHistory()">Обновить данные</button>
+            <button class="cmd-btn" onclick="exportCSV()">Экспорт CSV</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<script>
+const IS_ADMIN = {{ is_admin|yesno:"true,false" }};
+const UE_COLORS = ['#378ADD','#1D9E75','#EF9F27','#D4537E'];
+const UE_DEFAULTS_PL = [0, 10, 20, 30];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+const state = {
+  ues: [
+    {id:1, active:true, pathloss:0,  dl:0, ul:0, snr:0, nok:0},
+    {id:2, active:true, pathloss:10, dl:0, ul:0, snr:0, nok:0},
+    {id:3, active:true, pathloss:20, dl:0, ul:0, snr:0, nok:0},
+    {id:4, active:true, pathloss:30, dl:0, ul:0, snr:0, nok:0},
+  ],
+  range: '30m',
+  noise: 'none',
+  noiseLevel: 0,
+  logCount: 0,
+};
+
+
+// ── Logging ───────────────────────────────────────────────────────────────────
+function log(msg, type=''){
+  state.logCount++;
+  const box = document.getElementById('log-box');
+  const ts = new Date().toTimeString().slice(0,8);
+  const el = document.createElement('div');
+  el.className = 'log-line ' + type;
+  el.innerHTML = `<span class="log-ts">${ts}</span><span class="log-msg">${msg}</span>`;
+  box.prepend(el);
+  while(box.children.length > 150) box.removeChild(box.lastChild);
+  document.getElementById('log-cnt').textContent = state.logCount + ' событий';
+}
+
+// ── CSRF ──────────────────────────────────────────────────────────────────────
+function getCsrf(){
+  return document.cookie.split(';').map(c=>c.trim()).find(c=>c.startsWith('csrftoken='))?.split('=')[1] || '';
+}
+function post(url, data){
+  return fetch(url, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-CSRFToken':getCsrf()},
+    body: JSON.stringify(data)
+  }).then(r=>r.json());
+}
+
+// ── Status badges ─────────────────────────────────────────────────────────────
+function setBadge(id, ok){
+  const el = document.getElementById('badge-'+id);
+  el.className = 'badge ' + (ok?'ok':'err');
+}
+
+// ── Build UE section ──────────────────────────────────────────────────────────
+function buildUEs(){
+  const sec = document.getElementById('ues-anchor');
+  sec.innerHTML = state.ues.map(ue=>{
+    const c = UE_COLORS[ue.id-1];
+    const adminCtrl = IS_ADMIN
+      ? `<button class="toggle on" id="ue-btn-${ue.id}" onclick="toggleUE(${ue.id})">ON</button>`
+      : `<span class="viewer-badge">viewer</span>`;
+    const slider = IS_ADMIN
+      ? `<div class="slider-row">
+           <span class="sl-label">Pathloss</span>
+           <input type="range" min="0" max="100" value="${ue.pathloss}" step="1"
+             oninput="setPathloss(${ue.id},this.value)">
+           <span class="sl-val" id="pl-val-${ue.id}">${ue.pathloss}dB</span>
+         </div>`
+      : `<div class="slider-row">
+           <span class="sl-label">Pathloss</span>
+           <input type="range" min="0" max="100" value="${ue.pathloss}" step="1" disabled>
+           <span class="sl-val" id="pl-val-${ue.id}">${ue.pathloss}dB</span>
+         </div>`;
+    return `
+      <div class="ue-card active" id="ue-card-${ue.id}">
+        <div class="ue-hd">
+          <span class="ue-name" style="color:${c}">UE${ue.id}</span>
+          ${adminCtrl}
+        </div>
+        <div class="ue-stats">
+          <div class="ue-stat"><div class="ue-stat-l">DL</div>
+            <div class="ue-stat-v"><span id="ue-dl-${ue.id}">—</span><span class="ue-stat-u">kb/s</span></div></div>
+          <div class="ue-stat"><div class="ue-stat-l">UL</div>
+            <div class="ue-stat-v"><span id="ue-ul-${ue.id}">—</span><span class="ue-stat-u">kb/s</span></div></div>
+          <div class="ue-stat"><div class="ue-stat-l">PUSCH SNR</div>
+            <div class="ue-stat-v"><span id="ue-snr-${ue.id}">—</span><span class="ue-stat-u">dB</span></div></div>
+          <div class="ue-stat"><div class="ue-stat-l">NOK%</div>
+            <div class="ue-stat-v" id="ue-nok-${ue.id}">—</div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-lbl"><span>DL</span><span id="ue-dl-pct-${ue.id}">0%</span></div>
+          <div class="bar-track"><div class="bar-fill" id="bar-dl-${ue.id}" style="background:${c};width:0%"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-lbl"><span>UL</span><span id="ue-ul-pct-${ue.id}">0%</span></div>
+          <div class="bar-track"><div class="bar-fill" id="bar-ul-${ue.id}" style="background:${c};width:0%"></div></div>
+        </div>
+        ${slider}
+      </div>`;
+  }).join('');
+}
+
+function updateUECards(){
+  state.ues.forEach(ue=>{
+    const card = document.getElementById(`ue-card-${ue.id}`);
+    if(!card) return;
+    card.className = 'ue-card ' + (ue.active?'active':'inactive');
+    if(IS_ADMIN){
+      const btn = document.getElementById(`ue-btn-${ue.id}`);
+      if(btn){ btn.className='toggle '+(ue.active?'on':''); btn.textContent=ue.active?'ON':'OFF'; }
+    }
+    const dlKb = (ue.dl * 1000).toFixed(0);
+    const ulKb = (ue.ul * 1000).toFixed(0);
+    document.getElementById(`ue-dl-${ue.id}`).textContent = dlKb;
+    document.getElementById(`ue-ul-${ue.id}`).textContent = ulKb;
+    document.getElementById(`ue-snr-${ue.id}`).textContent = ue.snr.toFixed(1);
+    document.getElementById(`ue-nok-${ue.id}`).textContent = ue.nok + '%';
+    // color NOK% red if bad
+    const nokEl = document.getElementById(`ue-nok-${ue.id}`);
+    nokEl.style.color = ue.nok > 20 ? 'var(--red)' : ue.nok > 5 ? 'var(--amber)' : 'var(--green)';
+    // SNR color
+    const snrEl = document.getElementById(`ue-snr-${ue.id}`);
+    snrEl.style.color = ue.snr < 0 ? 'var(--red)' : ue.snr < 5 ? 'var(--amber)' : 'var(--green)';
+    const dlPct = Math.min(100, ue.dl/15*100).toFixed(0);
+    const ulPct = Math.min(100, ue.ul/15*100).toFixed(0);
+    document.getElementById(`bar-dl-${ue.id}`).style.width = dlPct+'%';
+    document.getElementById(`bar-ul-${ue.id}`).style.width = ulPct+'%';
+    document.getElementById(`ue-dl-pct-${ue.id}`).textContent = dlPct+'%';
+    document.getElementById(`ue-ul-pct-${ue.id}`).textContent = ulPct+'%';
+  });
+}
+
+function updateTopMetrics(){
+  const active = state.ues.filter(u=>u.active);
+  const tdl = active.reduce((s,u)=>s+(u.dl*1000),0);
+  const tul = active.reduce((s,u)=>s+(u.ul*1000),0);
+  const asnr = active.length ? active.reduce((s,u)=>s+u.snr,0)/active.length : 0;
+  const aNok = active.length ? active.reduce((s,u)=>s+u.nok,0)/active.length : 0;
+  document.getElementById('m-dl').innerHTML = `${tdl.toFixed(0)}<span class="mc-unit">kb/s</span>`;
+  document.getElementById('m-ul').innerHTML = `${tul.toFixed(0)}<span class="mc-unit">kb/s</span>`;
+  document.getElementById('m-active').innerHTML = `${active.length}<span class="mc-unit">/4</span>`;
+  document.getElementById('m-snr').innerHTML = `${asnr.toFixed(1)}<span class="mc-unit">dB</span>`;
+  document.getElementById('m-nok').innerHTML = `${aNok.toFixed(0)}<span class="mc-unit">%</span>`;
+}
+
+// ── Live stats poll ───────────────────────────────────────────────────────────
+function fetchStats(){
+  fetch('/api/stats/').then(r=>r.json()).then(d=>{
+    setBadge('influx', d.ok);
+    if(!d.ok){ log('InfluxDB: '+d.error,'err'); return; }
+    setBadge('gnb', true);
+    (d.ues||[]).forEach((u,i)=>{
+      if(i>=4) return;
+      state.ues[i].dl  = u.dl  || 0;
+      state.ues[i].ul  = u.ul  || 0;
+      state.ues[i].snr = u.pusch_snr !== undefined ? u.pusch_snr : (u.snr || 0);
+      const ok  = u.dl_ok  || 0;
+      const nok = u.dl_nok || 0;
+      state.ues[i].nok = (ok+nok) > 0 ? Math.round(nok/(ok+nok)*100) : 0;
+    });
+    updateUECards();
+    updateTopMetrics();
+  }).catch(()=>{ setBadge('influx',false); setBadge('gnb',false); });
+}
+
+// ── Time range history ────────────────────────────────────────────────────────
+let activeRangeBtn = document.getElementById('tr-30m');
+
+function setRange(preset){
+  state.range = preset;
+  document.querySelectorAll('.tr-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tr-btn').forEach(b=>{
+    if(b.getAttribute('onclick')==`setRange('${preset}')`) b.classList.add('active');
+  });
+  loadHistory();
+  loadHistory2();
+}
+
+function loadHistory(){
+  const metric   = document.getElementById('sel-metric').value;
+  const interval = document.getElementById('sel-interval').value;
+  document.getElementById('loading-main').style.display='flex';
+  document.getElementById('chart-main-title').textContent = {
+    dl:'DL Throughput (Mbps)', ul:'UL Throughput (Mbps)',
+    mcs:'DL MCS', ul_mcs:'UL MCS',
+    bler_dl:'DL BLER (nok)', bler_ul:'UL BLER (nok)'
+  }[metric] || metric;
+
+  const params = `metric=${metric}&interval=${interval}&start=-${state.range||'30m'}`;
+
+  fetch(`/api/history/?${params}`).then(r=>r.json()).then(d=>{
+    document.getElementById('loading-main').style.display='none';
+    if(!d.ok){ log('History: '+d.error,'err'); return; }
+    const series = d.series || {};
+    const rntis = Object.keys(series);
+    if(!rntis.length){ mainChart.data.datasets=[]; mainChart.update(); return; }
+    // collect all unique timestamps as labels
+    const allTimes = [...new Set(rntis.flatMap(r=>series[r].map(p=>p.t)))].sort();
+    mainChart.data.labels = allTimes;
+    mainChart.data.datasets = rntis.map((rnti,i)=>{
+      const map = {};
+      series[rnti].forEach(p=>map[p.t]=p.v);
+      return {
+        label: rnti,
+        data: allTimes.map(t=>map[t]??null),
+        borderColor: UE_COLORS[i%4],
+        backgroundColor: UE_COLORS[i%4]+'18',
+        borderWidth:1.5, pointRadius:0, tension:0.4,
+        fill: metric==='dl'||metric==='ul',
+        spanGaps: true,
+      };
+    });
+    mainChart.update();
+    buildLegend('legend-main', rntis);
+  }).catch(e=>{ document.getElementById('loading-main').style.display='none'; log('History error','err'); });
+}
+
+function loadHistory2(){
+  const metric   = document.getElementById('sel-metric2').value;
+  const interval = document.getElementById('sel-interval').value;
+  document.getElementById('loading-main2').style.display='flex';
+  document.getElementById('chart-main2-title').textContent = {
+    dl:'DL Throughput (Mbps)', ul:'UL Throughput (Mbps)',
+    mcs:'DL MCS', ul_mcs:'UL MCS',
+    bler_dl:'DL BLER (nok)', bler_ul:'UL BLER (nok)'
+  }[metric] || metric;
+
+  const params = `metric=${metric}&interval=${interval}&start=-${state.range||'30m'}`;
+  fetch(`/api/history/?${params}`).then(r=>r.json()).then(d=>{
+    document.getElementById('loading-main2').style.display='none';
+    if(!d.ok){ log('History2: '+d.error,'err'); return; }
+    const series = d.series || {};
+    const rntis = Object.keys(series);
+    if(!rntis.length){ mainChart2.data.datasets=[]; mainChart2.update(); return; }
+    const allTimes = [...new Set(rntis.flatMap(r=>series[r].map(p=>p.t)))].sort();
+    mainChart2.data.labels = allTimes;
+    mainChart2.data.datasets = rntis.map((rnti,i)=>{
+      const map = {};
+      series[rnti].forEach(p=>map[p.t]=p.v);
+      return {
+        label: rnti,
+        data: allTimes.map(t=>map[t]??null),
+        borderColor: UE_COLORS[i%4],
+        backgroundColor: UE_COLORS[i%4]+'18',
+        borderWidth:1.5, pointRadius:0, tension:0.4,
+        fill: metric==='dl'||metric==='ul',
+        spanGaps: true,
+      };
+    });
+    mainChart2.update();
+    buildLegend('legend-main2', rntis);
+  }).catch(()=>{ document.getElementById('loading-main2').style.display='none'; log('History2 error','err'); });
+}
+
+
+function buildLegend(id, rntis){
+  document.getElementById(id).innerHTML = rntis.map((r,i)=>
+    `<span class="leg-item"><span class="leg-dot" style="background:${UE_COLORS[i%4]}"></span>${r}</span>`
+  ).join('');
+}
+
+// ── Controls (admin) ──────────────────────────────────────────────────────────
+function toggleUE(id){
+  if(!IS_ADMIN) return;
+  const ue = state.ues[id-1];
+  ue.active = !ue.active;
+  const pl = ue.active ? ue.pathloss : 100;
+  post(`/api/ue/${id}/toggle/`, {active: ue.active, pathloss: ue.pathloss})
+    .then(d=>{ setBadge('gnr', d.ok); log(`UE${id} ${ue.active?'включён':'отключён'}`, ue.active?'ok':'warn'); })
+    .catch(()=>setBadge('gnr',false));
+  updateUECards();
+}
+
+function setPathloss(id, val){
+  if(!IS_ADMIN) return;
+  state.ues[id-1].pathloss = parseInt(val);
+  document.getElementById(`pl-val-${id}`).textContent = val+'dB';
+  post(`/api/ue/${id}/pathloss/`, {value: parseInt(val)})
+    .then(d=>{ setBadge('gnr',d.ok); if(d.ok) log(`UE${id} pathloss → ${val}dB`); })
+    .catch(()=>setBadge('gnr',false));
+}
+
+function setAllUEs(active){
+  if(!IS_ADMIN) return;
+  state.ues.forEach(ue=>{ ue.active=active; post(`/api/ue/${ue.id}/toggle/`,{active,pathloss:ue.pathloss}); });
+  log(`Все UE ${active?'включены':'отключены'}`, active?'ok':'warn');
+  updateUECards();
+}
+
+function resetPathloss(){
+  if(!IS_ADMIN) return;
+  state.ues.forEach((ue,i)=>{
+    ue.pathloss = UE_DEFAULTS_PL[i];
+    post(`/api/ue/${ue.id}/pathloss/`,{value:UE_DEFAULTS_PL[i]});
+    const sl = document.querySelector(`#ues-anchor input[oninput*="setPathloss(${ue.id}"]`);
+    if(sl) sl.value = UE_DEFAULTS_PL[i];
+    document.getElementById(`pl-val-${ue.id}`).textContent = UE_DEFAULTS_PL[i]+'dB';
+  });
+  log('Pathloss сброшен','ok');
+}
+
+function setNoise(type){
+  state.noise = type;
+  document.querySelectorAll('.nbtn').forEach(b=>b.classList.remove('active'));
+  const btn = document.getElementById('n-'+type);
+  if(btn) btn.classList.add('active');
+  const labels = {none:'Чистый канал',awgn:'AWGN',fading:'Rayleigh Fading',shadow:'Shadowing',doppler:'Doppler',interf:'Интерференция'};
+  document.getElementById('noise-status').textContent = labels[type] || type;
+  if(IS_ADMIN) post('/api/noise/', {type, level: state.noiseLevel})
+    .then(d=>{ setBadge('gnr',d.ok); log('Помеха: '+labels[type], type==='none'?'ok':'warn'); })
+    .catch(()=>setBadge('gnr',false));
+}
+
+function updateNoiseLevel(val){
+  state.noiseLevel = parseInt(val);
+  document.getElementById('noise-v').textContent = val+' dB';
+  if(state.noise !== 'none')
+    post('/api/noise/', {type: state.noise, level: parseInt(val)}).catch(()=>{});
+}
+
+function exportCSV(){
+  const metric = document.getElementById('sel-metric').value;
+  const interval = document.getElementById('sel-interval').value;
+  const params = `metric=${metric}&interval=${interval}&start=-${state.range||'30m'}`;
+  window.location = `/api/export/?${params}`;
+  log('CSV экспорт запущен','ok');
+}
+
+function scrollToCharts(){ document.getElementById('charts-anchor').scrollIntoView({behavior:'smooth'}); }
+function scrollToUEs(){ document.getElementById('ues-anchor').scrollIntoView({behavior:'smooth'}); }
+
+// ── Charts init ───────────────────────────────────────────────────────────────
+const chartOpts = () => ({
+  responsive:true, maintainAspectRatio:false, animation:false,
+  plugins:{ legend:{display:false} },
+  scales:{
+    x:{ type:'category',
+        ticks:{color:'#3d4a60', font:{size:9}, maxTicksLimit:6, maxRotation:0,
+               callback: function(val, idx) {
+                 const lbl = this.getLabelForValue(val);
+                 return lbl ? lbl.slice(11,16) : '';
+               }},
+        grid:{color:'rgba(255,255,255,0.03)'}, border:{display:false} },
+    y:{ ticks:{color:'#3d4a60', font:{size:9}},
+        grid:{color:'rgba(255,255,255,0.03)'}, border:{display:false} }
+  }
+});
+
+const mainChart = new Chart(document.getElementById('chart-main'),{
+  type:'line', data:{labels:[], datasets:[]}, options: chartOpts()
+});
+
+const mainChart2 = new Chart(document.getElementById('chart-main2'),{
+  type:'line', data:{labels:[], datasets:[]}, options: chartOpts()
+});
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+buildUEs();
+log('Дашборд запущен','ok');
+log('Подключение к InfluxDB...');
+log('Подключение к GNU Radio XML-RPC...');
+
+fetchStats();
+loadHistory();
+loadHistory2();
+setInterval(fetchStats, 1000);
+setInterval(()=>{ loadHistory(); loadHistory2(); }, 30000);
+</script>
+</body>
+</html>

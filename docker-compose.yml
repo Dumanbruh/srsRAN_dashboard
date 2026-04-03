@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=proja.settings
+    # если InfluxDB и GNU Radio на хост-машине:
+    network_mode: host
+    volumes:
+      - ./db.sqlite3:/app/db.sqlite3
