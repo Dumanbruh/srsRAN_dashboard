@@ -1,0 +1,97 @@
+slug: bufferbloat_load
+name: "Bufferbloat / нагрузочный тест"
+description: >
+  Несколько UE, управляемая DL-нагрузка (аналогично экспериментам S1–S4):
+  снимаем метрики в состоянии покоя, даём длительную нагрузку на все UE,
+  снимаем метрики под нагрузкой, даём сети восстановиться. Нагрузка идёт как
+  iperf3-клиент внутри netns каждого UE (root-примитив testbed_root_ops.sh
+  iperf_client) против обычного iperf3-сервера на хосте — направление DL/UL
+  выбирается флагом -R самого iperf3, сервер внутри netns UE не нужен ни для
+  одного из направлений. Проверено на реальном прогоне 17.08.2026: чистая
+  кривая baseline → нагрузка → восстановление.
+
+parameters:
+  n_ue:
+    type: int
+    default: 2
+    min: 1
+    max: 7
+    label: "Число UE"
+  bitrate_mbps:
+    type: float
+    default: 20
+    min: 0.5
+    max: 100
+    label: "Целевой битрейт на UE, Мбит/с"
+  load_duration_s:
+    type: int
+    default: 120
+    min: 10
+    max: 1800
+    label: "Длительность нагрузки, с"
+  idle_before_s:
+    type: int
+    default: 15
+    min: 0
+    max: 300
+    label: "Пауза перед нагрузкой (baseline RTT), с"
+  idle_after_s:
+    type: int
+    default: 15
+    min: 0
+    max: 300
+    label: "Пауза после нагрузки (восстановление), с"
+
+steps:
+  - type: component_start
+    component: gnuradio
+    params: {n: "{{n_ue}}"}
+  - type: wait_ready
+    component: gnuradio
+    timeout_s: 40
+
+  - type: component_start
+    component: gnb
+  - type: wait_ready
+    component: gnb
+    timeout_s: 30
+
+  - type: component_start
+    component: ue
+    params: {n: "{{n_ue}}"}
+  - type: wait_ready
+    component: ue
+    n: "{{n_ue}}"
+    timeout_s: 40
+    timeout_s_per_ue: 20
+
+  - type: component_start
+    component: bridge
+
+  - type: snapshot_metrics
+    label: "baseline before load"
+  - type: sleep
+    duration_s: "{{idle_before_s}}"
+
+  - type: snapshot_metrics
+    label: "load start"
+  - type: load_dl
+    n: "{{n_ue}}"
+    bitrate_mbps: "{{bitrate_mbps}}"
+    duration_s: "{{load_duration_s}}"
+  - type: snapshot_metrics
+    label: "load end"
+
+  - type: sleep
+    duration_s: "{{idle_after_s}}"
+  - type: snapshot_metrics
+    label: "recovery"
+
+  - type: component_stop
+    component: bridge
+  - type: component_stop
+    component: ue
+  - type: component_stop
+    component: gnb
+  - type: component_stop
+    component: gnuradio

@@ -1,0 +1,64 @@
+slug: basic_connectivity
+name: "Базовое подключение"
+description: >
+  Поднять core (Open5GS уже работает как systemd-сервисы) + gNB + N UE,
+  дождаться готовности каждого компонента, подержать сеть поднятой заданное
+  время, погасить всё в обратном порядке.
+
+parameters:
+  n_ue:
+    type: int
+    default: 1
+    min: 1
+    max: 7
+    label: "Число UE"
+  hold_s:
+    type: int
+    default: 60
+    min: 5
+    max: 3600
+    label: "Время удержания сети поднятой, с"
+
+steps:
+  - type: component_start
+    component: gnuradio
+    params: {n: "{{n_ue}}"}
+  - type: wait_ready
+    component: gnuradio
+    timeout_s: 40
+
+  - type: component_start
+    component: gnb
+  - type: wait_ready
+    component: gnb
+    timeout_s: 30
+
+  - type: component_start
+    component: ue
+    params: {n: "{{n_ue}}"}
+  - type: wait_ready
+    component: ue
+    n: "{{n_ue}}"
+    timeout_s: 40
+    timeout_s_per_ue: 20
+
+  - type: component_start
+    component: bridge
+
+  - type: snapshot_metrics
+    label: "network up"
+
+  - type: sleep
+    duration_s: "{{hold_s}}"
+
+  - type: snapshot_metrics
+    label: "before teardown"
+
+  - type: component_stop
+    component: bridge
+  - type: component_stop
+    component: ue
+  - type: component_stop
+    component: gnb
+  - type: component_stop
+    component: gnuradio

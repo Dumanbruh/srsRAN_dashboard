@@ -3,28 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>srsRAN Dashboard</title>
+<title>KazNU 5G Project</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#07090f;--bg2:#0d1120;--bg3:#111827;--bg4:#161d2e;
-  --border:rgba(55,138,221,0.12);--border2:rgba(55,138,221,0.25);
-  --text:#c8d4e8;--text2:#6b7a96;--text3:#3d4a60;
-  --blue:#378ADD;--blue-bg:rgba(55,138,221,0.08);
-  --green:#1D9E75;--green-bg:rgba(29,158,117,0.08);
-  --red:#E24B4A;--red-bg:rgba(226,75,74,0.08);
-  --amber:#EF9F27;--amber-bg:rgba(239,159,39,0.08);
-  --pink:#D4537E;
+  --bg:#f4f6fb;--bg2:#ffffff;--bg3:#eef1f7;--bg4:#e4e9f1;
+  --border:rgba(47,111,176,0.15);--border2:rgba(47,111,176,0.3);
+  --text:#1a2233;--text2:#5b6b85;--text3:#8b98ac;
+  --blue:#2f6fb0;--blue-bg:rgba(47,111,176,0.08);
+  --green:#178a63;--green-bg:rgba(23,138,99,0.08);
+  --red:#c73e3d;--red-bg:rgba(199,62,61,0.08);
+  --amber:#b9790a;--amber-bg:rgba(185,121,10,0.1);
+  --pink:#b8305c;
   --mono:'Share Tech Mono',monospace;
   --sans:'Exo 2',sans-serif;
 }
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;min-height:100vh;
   background-image:
-    radial-gradient(ellipse at 0% 0%, rgba(55,138,221,0.03) 0%,transparent 50%),
-    radial-gradient(ellipse at 100% 100%, rgba(29,158,117,0.03) 0%,transparent 50%);
+    radial-gradient(ellipse at 0% 0%, rgba(47,111,176,0.04) 0%,transparent 50%),
+    radial-gradient(ellipse at 100% 100%, rgba(23,138,99,0.04) 0%,transparent 50%);
 }
 
 /* ── Layout ── */
@@ -154,6 +154,29 @@ input[type=range]:disabled{opacity:0.3;cursor:default;}
 .noise-intensity{display:flex;align-items:center;gap:10px;}
 .ni-label{font-size:10px;color:var(--text3);min-width:65px;text-transform:uppercase;letter-spacing:0.1em;}
 
+/* ── Scenario panel ── */
+.scn-badge{font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid;display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);}
+.scn-badge::before{content:'';width:5px;height:5px;border-radius:50%;}
+.scn-badge.idle{background:var(--bg3);color:var(--text3);border-color:var(--border);}
+.scn-badge.idle::before{background:var(--text3);}
+.scn-badge.running{background:var(--blue-bg);color:var(--blue);border-color:rgba(47,111,176,0.4);}
+.scn-badge.running::before{background:var(--blue);animation:blink 1.2s infinite;}
+.scn-badge.completed{background:var(--green-bg);color:var(--green);border-color:rgba(23,138,99,0.3);}
+.scn-badge.completed::before{background:var(--green);}
+.scn-badge.failed{background:var(--red-bg);color:var(--red);border-color:rgba(199,62,61,0.3);}
+.scn-badge.failed::before{background:var(--red);}
+.scn-badge.stopped{background:var(--amber-bg);color:var(--amber);border-color:rgba(185,121,10,0.3);}
+.scn-badge.stopped::before{background:var(--amber);}
+.scn-run-meta{font-size:11px;color:var(--text3);margin-top:2px;}
+.scn-log-box{height:120px;overflow-y:auto;background:var(--bg3);border-radius:3px;padding:8px;font-family:var(--mono);font-size:11px;margin-top:0.6rem;display:none;}
+.scn-log-box::-webkit-scrollbar{width:3px;}
+.scn-log-box::-webkit-scrollbar-thumb{background:var(--bg4);}
+.scn-log-line{padding:2px 0;display:flex;gap:8px;}
+.scn-log-step{color:var(--text3);min-width:26px;flex-shrink:0;text-align:right;}
+.scn-log-msg{color:var(--text2);}
+.scn-log-line.warn .scn-log-msg{color:var(--amber);}
+.scn-log-line.error .scn-log-msg{color:var(--red);}
+
 /* ── Bottom ── */
 .bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
 .log-panel{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1rem;}
@@ -164,7 +187,7 @@ input[type=range]:disabled{opacity:0.3;cursor:default;}
 .log-box::-webkit-scrollbar{width:3px;}
 .log-box::-webkit-scrollbar-track{background:transparent;}
 .log-box::-webkit-scrollbar-thumb{background:var(--bg4);}
-.log-line{padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:10px;display:flex;gap:8px;font-family:var(--mono);}
+.log-line{padding:3px 0;border-bottom:1px solid rgba(0,0,0,0.05);font-size:10px;display:flex;gap:8px;font-family:var(--mono);}
 .log-ts{color:var(--text3);min-width:58px;flex-shrink:0;}
 .log-msg{color:var(--text2);}
 .log-line.ok .log-msg{color:var(--green);}
@@ -191,8 +214,8 @@ body.viewer .admin-only{display:none !important;}
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sb-logo">
-      <div class="sb-logo-text">srs<span>RAN</span></div>
-      <div class="sb-logo-sub">Control Dashboard</div>
+      <div class="sb-logo-text">Kaz<span>NU</span></div>
+      <div class="sb-logo-sub">5G Project</div>
     </div>
     <div class="sb-section">Навигация</div>
     <div class="sb-link active">
@@ -212,6 +235,16 @@ body.viewer .admin-only{display:none !important;}
       <svg class="icon" viewBox="0 0 16 16" fill="currentColor"><path d="M3 2h7l3 3v9H3V2z" stroke="currentColor" stroke-width="1.5" fill="none"/><polyline points="10,2 10,5 13,5" stroke="currentColor" stroke-width="1" fill="none"/><line x1="6" y1="9" x2="10" y2="9" stroke="currentColor" stroke-width="1.5"/></svg>
       Экспорт CSV
     </div>
+    <div class="sb-section">Автоматизация</div>
+    <a href="/scenarios/" class="sb-link" style="text-decoration:none">
+      <svg class="icon" viewBox="0 0 16 16" fill="currentColor"><polygon points="4,2 13,8 4,14" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/></svg>
+      Сценарии
+    </a>
+    <div class="sb-section">AI</div>
+    <a href="/ai/" class="sb-link" style="text-decoration:none">
+      <svg class="icon" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M5 9.5c0-1.5 1-2.5 3-2.5s3 1 3 2.5" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/><circle cx="6" cy="6.5" r="0.8"/><circle cx="10" cy="6.5" r="0.8"/></svg>
+      AI Ассистент
+    </a>
     <div class="sb-bottom">
       <div class="sb-user">
         <div class="sb-avatar">{{ user.username|first|upper }}</div>
@@ -233,6 +266,7 @@ body.viewer .admin-only{display:none !important;}
         <div class="badge err" id="badge-influx">InfluxDB</div>
         <div class="badge err" id="badge-gnr">GNU Radio</div>
         <div class="badge err" id="badge-gnb">gNB</div>
+        <div class="badge err" id="badge-testbed">Testbed</div>
       </div>
     </div>
 
@@ -256,6 +290,8 @@ body.viewer .admin-only{display:none !important;}
           <option value="ul_mcs">UL MCS</option>
           <option value="bler_dl">DL BLER</option>
           <option value="bler_ul">UL BLER</option>
+          <option value="loss_dl">DL Packet Loss %</option>
+          <option value="loss_ul">UL Packet Loss %</option>
         </select>
         <div class="tr-sep"></div>
         <span class="tr-label">Метрика 2</span>
@@ -266,9 +302,11 @@ body.viewer .admin-only{display:none !important;}
           <option value="ul_mcs">UL MCS</option>
           <option value="bler_dl">DL BLER</option>
           <option value="bler_ul">UL BLER</option>
+          <option value="loss_dl">DL Packet Loss %</option>
+          <option value="loss_ul">UL Packet Loss %</option>
         </select>
         <div class="tr-sep"></div>
-        <select class="tr-interval-select" id="sel-interval" onchange="loadHistory();loadHistory2()">
+        <select class="tr-interval-select" id="sel-interval" onchange="loadHistory();loadHistory2();scheduleChartRefresh()">
           <option value="5s">5с</option>
           <option value="10s">10с</option>
           <option value="30s" selected>30с</option>
@@ -278,6 +316,16 @@ body.viewer .admin-only{display:none !important;}
         <button class="btn-export" onclick="exportCSV()">↓ CSV</button>
       </div>
 
+      <!-- Custom period -->
+      <div class="toolbar" style="margin-top:-6px">
+        <span class="tr-label">Точный период</span>
+        <input type="datetime-local" id="custom-start" class="tr-interval-select" style="cursor:text">
+        <span class="tr-label">—</span>
+        <input type="datetime-local" id="custom-end" class="tr-interval-select" style="cursor:text">
+        <button class="tr-btn" onclick="applyCustomRange()">Применить</button>
+        <span class="tr-label" id="custom-range-hint" style="display:none;color:var(--blue)">точный период активен — график зафиксирован, не обновляется</span>
+      </div>
+
       <!-- Metric cards -->
       <div class="metrics-grid">
         <div class="mcard blue"><div class="mc-label">Total DL</div><div class="mc-val" id="m-dl">—<span class="mc-unit">kb/s</span></div></div>
@@ -285,6 +333,23 @@ body.viewer .admin-only{display:none !important;}
         <div class="mcard green"><div class="mc-label">Активных UE</div><div class="mc-val" id="m-active">—<span class="mc-unit">/4</span></div></div>
         <div class="mcard amber"><div class="mc-label">Avg PUSCH SNR</div><div class="mc-val" id="m-snr">—<span class="mc-unit">dB</span></div></div>
         <div class="mcard pink"><div class="mc-label">Avg NOK%</div><div class="mc-val" id="m-nok">—<span class="mc-unit">%</span></div></div>
+      </div>
+
+      <!-- Scenario runner -->
+      <div class="panel" id="scenario-panel" style="margin-bottom:1rem">
+        <div class="panel-hd">
+          <span class="panel-title">Сценарий</span>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span id="scn-badge"></span>
+            <a href="/scenarios/" class="tr-label" style="text-decoration:none;color:var(--blue)">Все сценарии →</a>
+          </div>
+        </div>
+        <div class="admin-only" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:0.5rem">
+          <select class="tr-metric-select" id="sel-quick-scenario" style="flex:1;min-width:200px"></select>
+          <button class="tr-btn" id="btn-quick-run" onclick="quickRunScenario()">Быстрый запуск (по умолчанию)</button>
+        </div>
+        <div id="scn-run-info" class="scn-run-meta">Сейчас ничего не выполняется.</div>
+        <div class="scn-log-box" id="scn-log-box"></div>
       </div>
 
       <!-- Charts -->
@@ -313,6 +378,27 @@ body.viewer .admin-only{display:none !important;}
 
       <!-- UE Cards -->
       <div class="ue-grid" id="ues-anchor"></div>
+
+      <!-- Testbed control (admin only) -->
+      <div class="noise-panel admin-only">
+        <div class="noise-hd">
+          <span>Управление стендом</span>
+          <span style="font-size:10px;color:var(--text3);font-family:var(--mono)" id="testbed-status-text">Остановлен</span>
+        </div>
+        <div class="noise-btns" style="grid-template-columns:auto auto auto;">
+          <select class="tr-metric-select" id="sel-n-ues">
+            <option value="1">1 UE</option>
+            <option value="2">2 UE</option>
+            <option value="3">3 UE</option>
+            <option value="4">4 UE</option>
+            <option value="5">5 UE</option>
+            <option value="6">6 UE</option>
+            <option value="7">7 UE</option>
+          </select>
+          <button class="cmd-btn" id="btn-testbed-start" onclick="startTestbed()">Запустить</button>
+          <button class="cmd-btn danger" id="btn-testbed-stop" onclick="stopTestbed()">Остановить</button>
+        </div>
+      </div>
 
       <!-- Noise panel (admin only) -->
       <div class="noise-panel admin-only">
@@ -363,22 +449,47 @@ body.viewer .admin-only{display:none !important;}
 
 <script>
 const IS_ADMIN = {{ is_admin|yesno:"true,false" }};
-const UE_COLORS = ['#378ADD','#1D9E75','#EF9F27','#D4537E'];
-const UE_DEFAULTS_PL = [0, 10, 20, 30];
+const UE_COLORS = ['#378ADD','#1D9E75','#EF9F27','#D4537E','#8B5CF6','#14B8A6','#F97316'];
+// All 0 — this testbed's real link margin is only ~11.5dB, so the old staggered
+// 0/10/20/30/40/50/60dB demo preset pushed every UE past UE1 below the sync
+// threshold the moment it was applied (via "Сброс pathloss" or any UE toggle,
+// which sends this array's value straight to the real GNU Radio broker) —
+// only UE1 ever got real traffic. "Сброс" should mean "clear", not "stagger".
+const UE_DEFAULTS_PL = [0, 0, 0, 0, 0, 0, 0];
 
 // ── State ─────────────────────────────────────────────────────────────────────
 const state = {
-  ues: [
-    {id:1, active:true, pathloss:0,  dl:0, ul:0, snr:0, nok:0},
-    {id:2, active:true, pathloss:10, dl:0, ul:0, snr:0, nok:0},
-    {id:3, active:true, pathloss:20, dl:0, ul:0, snr:0, nok:0},
-    {id:4, active:true, pathloss:30, dl:0, ul:0, snr:0, nok:0},
-  ],
+  ues: [],
   range: '30m',
+  customStart: null,  // ISO string, set via the "точный период" inputs or ?start=&end= in the URL
+  customEnd: null,
   noise: 'none',
   noiseLevel: 0,
   logCount: 0,
+  testbedRunning: false,
 };
+
+// UE ids currently mid demo-traffic animation (runTraffic()). While non-empty,
+// loadHistory()/loadHistory2() must not touch the main charts — they always
+// fully replace chart.data.datasets with real InfluxDB series (and clear it
+// outright when there's none), which wipes the demo overlay out from under
+// itself the moment a scheduled refresh lands mid-animation.
+const demoActiveUes = new Set();
+
+function rangeParams(){
+  if(state.customStart && state.customEnd){
+    return `start=${encodeURIComponent(state.customStart)}&end=${encodeURIComponent(state.customEnd)}`;
+  }
+  return `start=-${state.range||'30m'}`;
+}
+
+function rebuildUEState(count){
+  state.ues = Array.from({length: count}, (_, i) => ({
+    id: i+1, active: true, pathloss: UE_DEFAULTS_PL[i] || 0,
+    dl: 0, ul: 0, snr: 0, nok: 0,
+  }));
+  buildUEs();
+}
 
 
 // ── Logging ───────────────────────────────────────────────────────────────────
@@ -406,10 +517,153 @@ function post(url, data){
   }).then(r=>r.json());
 }
 
+// ── Scenario runner (embedded so the graph above is visible while a scenario runs) ─
+let scnCatalog = [];
+let scnActiveRunId = null;
+let scnEventSource = null;
+
+function scnStatusLabel(status){
+  return {idle:'ожидание', running:'выполняется', completed:'завершён',
+          failed:'ошибка', stopped:'остановлен'}[status] || status;
+}
+
+function loadScenarioCatalog(){
+  fetch('/api/scenarios/').then(r=>r.json()).then(d=>{
+    if(!d.ok) return;
+    scnCatalog = d.scenarios;
+    const sel = document.getElementById('sel-quick-scenario');
+    if(!sel) return;
+    sel.innerHTML = scnCatalog.map(s => `<option value="${s.slug}">${s.name}</option>`).join('');
+  });
+}
+
+function quickRunScenario(){
+  const sel = document.getElementById('sel-quick-scenario');
+  const slug = sel.value;
+  if(!slug) return;
+  const btn = document.getElementById('btn-quick-run');
+  btn.disabled = true;
+  // No overrides — start_run() falls back to each parameter's declared
+  // default, same as an untouched scenario-card form on /scenarios/.
+  post(`/api/scenarios/${slug}/run/`, {}).then(d=>{
+    btn.disabled = false;
+    if(!d.ok){ alert('Ошибка запуска: ' + d.error); return; }
+    attachScenarioRun(d.run.id);
+  }).catch(()=>{ btn.disabled = false; });
+}
+
+function renderScenarioPanel(run){
+  const badge = document.getElementById('scn-badge');
+  const info = document.getElementById('scn-run-info');
+  const logBox = document.getElementById('scn-log-box');
+  if(!run){
+    badge.innerHTML = '';
+    info.textContent = 'Сейчас ничего не выполняется.';
+    logBox.style.display = 'none';
+    return;
+  }
+  badge.innerHTML = `<span class="scn-badge ${run.status}">${scnStatusLabel(run.status)}</span>`;
+  info.innerHTML = `<b>${run.scenario_name}</b> #${run.id} · шаг ${run.current_step ?? '—'}` +
+    (run.error ? ` · <span style="color:var(--red)">ошибка: ${run.error}</span>` : '') +
+    (run.status === 'running' ? ` · <a href="javascript:void(0)" onclick="stopScenarioRun(${run.id})" style="color:var(--red);text-decoration:none">[остановить]</a>` : '');
+  const preserved = (logBox.dataset.runId === String(run.id)) ? logBox.innerHTML : '';
+  logBox.innerHTML = preserved;
+  logBox.dataset.runId = String(run.id);
+  logBox.style.display = 'block';
+  logBox.scrollTop = logBox.scrollHeight;
+}
+
+function appendScenarioLogLine(payload){
+  const box = document.getElementById('scn-log-box');
+  if(!box) return;
+  const el = document.createElement('div');
+  el.className = 'scn-log-line ' + (payload.level || '');
+  const step = payload.step !== null && payload.step !== undefined ? payload.step : '';
+  el.innerHTML = `<span class="scn-log-step">${step}</span><span class="scn-log-msg">${payload.message}</span>`;
+  box.appendChild(el);
+  box.scrollTop = box.scrollHeight;
+}
+
+function attachScenarioRun(runId){
+  if(scnEventSource){ scnEventSource.close(); scnEventSource = null; }
+  scnActiveRunId = runId;
+
+  fetch(`/api/runs/${runId}/`).then(r=>r.json()).then(d=>{
+    if(d.ok) renderScenarioPanel(d.run);
+  });
+
+  const es = new EventSource(`/api/runs/${runId}/logs/stream/`);
+  scnEventSource = es;
+  es.onmessage = (ev) => appendScenarioLogLine(JSON.parse(ev.data));
+  es.addEventListener('done', () => {
+    es.close();
+    if(scnEventSource === es) scnEventSource = null;
+    fetch(`/api/runs/${runId}/`).then(r=>r.json()).then(d=>{
+      if(d.ok) renderScenarioPanel(d.run);
+    });
+  });
+  es.onerror = () => { /* EventSource retries on its own */ };
+}
+
+function stopScenarioRun(runId){
+  post(`/api/runs/${runId}/stop/`, {}).then(d=>{
+    if(!d.ok) alert('Не удалось остановить: ' + d.error);
+  });
+}
+
+function checkForActiveScenarioRun(){
+  if(scnActiveRunId) return;
+  fetch('/api/runs/?limit=5').then(r=>r.json()).then(d=>{
+    if(!d.ok) return;
+    const running = d.runs.find(r => r.status === 'running');
+    if(running) attachScenarioRun(running.id);
+  });
+}
+
 // ── Status badges ─────────────────────────────────────────────────────────────
 function setBadge(id, ok){
   const el = document.getElementById('badge-'+id);
   el.className = 'badge ' + (ok?'ok':'err');
+}
+
+// ── Per-card mini chart (только для демо-трафика, не связан с историей) ───────
+const ueCharts = {};
+function initUECharts(){
+  Object.values(ueCharts).forEach(ch=>ch.destroy());
+  for(const key in ueCharts) delete ueCharts[key];
+  state.ues.forEach(ue=>{
+    const el = document.getElementById(`ue-chart-${ue.id}`);
+    if(!el) return;
+    ueCharts[ue.id] = new Chart(el, {
+      type:'line',
+      data:{ labels:[], datasets:[
+        {label:'DL', data:[], borderColor:'#2f6fb0', backgroundColor:'#2f6fb018', borderWidth:1.5, pointRadius:0, tension:0.4, fill:true},
+        {label:'UL', data:[], borderColor:'#178a63', backgroundColor:'#178a6318', borderWidth:1.5, pointRadius:0, tension:0.4, fill:true},
+      ]},
+      options:{
+        responsive:true, maintainAspectRatio:false, animation:false,
+        plugins:{legend:{display:false}},
+        scales:{
+          x:{display:false},
+          y:{display:false, beginAtZero:true},
+        },
+      },
+    });
+  });
+}
+
+function pushUEChartPoint(ueId, dl, ul){
+  const ch = ueCharts[ueId];
+  if(!ch) return;
+  ch.data.labels.push('');
+  ch.data.datasets[0].data.push(dl);
+  ch.data.datasets[1].data.push(ul);
+  if(ch.data.labels.length > 20){
+    ch.data.labels.shift();
+    ch.data.datasets[0].data.shift();
+    ch.data.datasets[1].data.shift();
+  }
+  ch.update();
 }
 
 // ── Build UE section ──────────────────────────────────────────────────────────
@@ -457,8 +711,13 @@ function buildUEs(){
           <div class="bar-track"><div class="bar-fill" id="bar-ul-${ue.id}" style="background:${c};width:0%"></div></div>
         </div>
         ${slider}
+        <div style="height:50px;margin-top:8px"><canvas id="ue-chart-${ue.id}"></canvas></div>
+        <button class="cmd-btn" id="traffic-btn-${ue.id}" onclick="runTraffic(${ue.id})" style="margin-top:8px;width:100%">
+          ▶ Трафик (демо)
+        </button>
       </div>`;
   }).join('');
+  initUECharts();
 }
 
 function updateUECards(){
@@ -499,7 +758,7 @@ function updateTopMetrics(){
   const aNok = active.length ? active.reduce((s,u)=>s+u.nok,0)/active.length : 0;
   document.getElementById('m-dl').innerHTML = `${tdl.toFixed(0)}<span class="mc-unit">kb/s</span>`;
   document.getElementById('m-ul').innerHTML = `${tul.toFixed(0)}<span class="mc-unit">kb/s</span>`;
-  document.getElementById('m-active').innerHTML = `${active.length}<span class="mc-unit">/4</span>`;
+  document.getElementById('m-active').innerHTML = `${active.length}<span class="mc-unit">/${state.ues.length||0}</span>`;
   document.getElementById('m-snr').innerHTML = `${asnr.toFixed(1)}<span class="mc-unit">dB</span>`;
   document.getElementById('m-nok').innerHTML = `${aNok.toFixed(0)}<span class="mc-unit">%</span>`;
 }
@@ -511,7 +770,8 @@ function fetchStats(){
     if(!d.ok){ log('InfluxDB: '+d.error,'err'); return; }
     setBadge('gnb', true);
     (d.ues||[]).forEach((u,i)=>{
-      if(i>=4) return;
+      if(i >= state.ues.length) return;   // status poll will resize state.ues shortly
+      if(state.ues[i].trafficRunning) return;   // не перетирать демо-анимацию трафика
       state.ues[i].dl  = u.dl  || 0;
       state.ues[i].ul  = u.ul  || 0;
       state.ues[i].snr = u.pusch_snr !== undefined ? u.pusch_snr : (u.snr || 0);
@@ -529,25 +789,80 @@ let activeRangeBtn = document.getElementById('tr-30m');
 
 function setRange(preset){
   state.range = preset;
+  state.customStart = null;
+  state.customEnd = null;
+  document.getElementById('custom-range-hint').style.display = 'none';
   document.querySelectorAll('.tr-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.tr-btn').forEach(b=>{
     if(b.getAttribute('onclick')==`setRange('${preset}')`) b.classList.add('active');
   });
   loadHistory();
   loadHistory2();
+  scheduleChartRefresh();
+}
+
+function applyCustomRange(){
+  const startEl = document.getElementById('custom-start');
+  const endEl = document.getElementById('custom-end');
+  if(!startEl.value || !endEl.value){ log('Укажи начало и конец периода','warn'); return; }
+  state.customStart = new Date(startEl.value).toISOString();
+  state.customEnd = new Date(endEl.value).toISOString();
+  document.querySelectorAll('.tr-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('custom-range-hint').style.display = 'inline';
+  loadHistory();
+  loadHistory2();
+  scheduleChartRefresh();
+}
+
+// ── Chart auto-refresh: cadence follows the selected bucket interval instead
+// of a fixed 30s, and stops entirely on a fixed (custom) historical window —
+// re-polling a frozen past window forever was silent, wasted work and made
+// the "точный период" view look broken (never seemed to change, for good
+// reason: it's a snapshot, not a live feed). ────────────────────────────────
+let chartRefreshTimer = null;
+function intervalToMs(iv){
+  const n = parseInt(iv, 10) || 30;
+  return iv.endsWith('m') ? n * 60000 : n * 1000;
+}
+function scheduleChartRefresh(){
+  if(chartRefreshTimer){ clearInterval(chartRefreshTimer); chartRefreshTimer = null; }
+  if(state.customStart && state.customEnd) return;   // fixed window — nothing to refresh
+  const ms = Math.max(intervalToMs(document.getElementById('sel-interval').value), 3000);
+  chartRefreshTimer = setInterval(()=>{ loadHistory(); loadHistory2(); }, ms);
+}
+
+// <input type=datetime-local> has no timezone of its own — its .value is
+// always read back as LOCAL time by `new Date(...)` (that's what
+// applyCustomRange() below relies on for manual entry, matching what the
+// user sees on the wall clock). So a UTC ISO string from the API (e.g. a
+// scenario run's started_at) has to be converted to the browser's local
+// wall-clock representation here, not just have its offset chopped off —
+// otherwise a non-UTC browser silently queries the wrong window entirely
+// (shifted by its UTC offset) and the chart comes back empty.
+function toDatetimeLocalValue(date){
+  const pad = n => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function setCustomRangeFromISO(startISO, endISO){
+  document.getElementById('custom-start').value = toDatetimeLocalValue(new Date(startISO));
+  document.getElementById('custom-end').value = toDatetimeLocalValue(new Date(endISO));
+  applyCustomRange();
 }
 
 function loadHistory(){
+  if(demoActiveUes.size) return;  // don't let a real-data refresh wipe the demo overlay mid-animation
   const metric   = document.getElementById('sel-metric').value;
   const interval = document.getElementById('sel-interval').value;
   document.getElementById('loading-main').style.display='flex';
   document.getElementById('chart-main-title').textContent = {
     dl:'DL Throughput (Mbps)', ul:'UL Throughput (Mbps)',
     mcs:'DL MCS', ul_mcs:'UL MCS',
-    bler_dl:'DL BLER (nok)', bler_ul:'UL BLER (nok)'
+    bler_dl:'DL BLER (nok)', bler_ul:'UL BLER (nok)',
+    loss_dl:'DL Packet Loss (%)', loss_ul:'UL Packet Loss (%)'
   }[metric] || metric;
 
-  const params = `metric=${metric}&interval=${interval}&start=-${state.range||'30m'}`;
+  const params = `metric=${metric}&interval=${interval}&${rangeParams()}`;
 
   fetch(`/api/history/?${params}`).then(r=>r.json()).then(d=>{
     document.getElementById('loading-main').style.display='none';
@@ -564,9 +879,9 @@ function loadHistory(){
       return {
         label: rnti,
         data: allTimes.map(t=>map[t]??null),
-        borderColor: UE_COLORS[i%4],
-        backgroundColor: UE_COLORS[i%4]+'18',
-        borderWidth:1.5, pointRadius:0, tension:0.4,
+        borderColor: UE_COLORS[i%UE_COLORS.length],
+        backgroundColor: UE_COLORS[i%UE_COLORS.length]+'18',
+        borderWidth:1.5, pointRadius:2, pointHoverRadius:4, tension:0.4,
         fill: metric==='dl'||metric==='ul',
         spanGaps: true,
       };
@@ -577,16 +892,18 @@ function loadHistory(){
 }
 
 function loadHistory2(){
+  if(demoActiveUes.size) return;  // don't let a real-data refresh wipe the demo overlay mid-animation
   const metric   = document.getElementById('sel-metric2').value;
   const interval = document.getElementById('sel-interval').value;
   document.getElementById('loading-main2').style.display='flex';
   document.getElementById('chart-main2-title').textContent = {
     dl:'DL Throughput (Mbps)', ul:'UL Throughput (Mbps)',
     mcs:'DL MCS', ul_mcs:'UL MCS',
-    bler_dl:'DL BLER (nok)', bler_ul:'UL BLER (nok)'
+    bler_dl:'DL BLER (nok)', bler_ul:'UL BLER (nok)',
+    loss_dl:'DL Packet Loss (%)', loss_ul:'UL Packet Loss (%)'
   }[metric] || metric;
 
-  const params = `metric=${metric}&interval=${interval}&start=-${state.range||'30m'}`;
+  const params = `metric=${metric}&interval=${interval}&${rangeParams()}`;
   fetch(`/api/history/?${params}`).then(r=>r.json()).then(d=>{
     document.getElementById('loading-main2').style.display='none';
     if(!d.ok){ log('History2: '+d.error,'err'); return; }
@@ -601,9 +918,9 @@ function loadHistory2(){
       return {
         label: rnti,
         data: allTimes.map(t=>map[t]??null),
-        borderColor: UE_COLORS[i%4],
-        backgroundColor: UE_COLORS[i%4]+'18',
-        borderWidth:1.5, pointRadius:0, tension:0.4,
+        borderColor: UE_COLORS[i%UE_COLORS.length],
+        backgroundColor: UE_COLORS[i%UE_COLORS.length]+'18',
+        borderWidth:1.5, pointRadius:2, pointHoverRadius:4, tension:0.4,
         fill: metric==='dl'||metric==='ul',
         spanGaps: true,
       };
@@ -616,7 +933,7 @@ function loadHistory2(){
 
 function buildLegend(id, rntis){
   document.getElementById(id).innerHTML = rntis.map((r,i)=>
-    `<span class="leg-item"><span class="leg-dot" style="background:${UE_COLORS[i%4]}"></span>${r}</span>`
+    `<span class="leg-item"><span class="leg-dot" style="background:${UE_COLORS[i%UE_COLORS.length]}"></span>${r}</span>`
   ).join('');
 }
 
@@ -682,7 +999,7 @@ function updateNoiseLevel(val){
 function exportCSV(){
   const metric = document.getElementById('sel-metric').value;
   const interval = document.getElementById('sel-interval').value;
-  const params = `metric=${metric}&interval=${interval}&start=-${state.range||'30m'}`;
+  const params = `metric=${metric}&interval=${interval}&${rangeParams()}`;
   window.location = `/api/export/?${params}`;
   log('CSV экспорт запущен','ok');
 }
@@ -696,14 +1013,14 @@ const chartOpts = () => ({
   plugins:{ legend:{display:false} },
   scales:{
     x:{ type:'category',
-        ticks:{color:'#3d4a60', font:{size:9}, maxTicksLimit:6, maxRotation:0,
+        ticks:{color:'#8b98ac', font:{size:9}, maxTicksLimit:6, maxRotation:0,
                callback: function(val, idx) {
                  const lbl = this.getLabelForValue(val);
                  return lbl ? lbl.slice(11,16) : '';
                }},
-        grid:{color:'rgba(255,255,255,0.03)'}, border:{display:false} },
-    y:{ ticks:{color:'#3d4a60', font:{size:9}},
-        grid:{color:'rgba(255,255,255,0.03)'}, border:{display:false} }
+        grid:{color:'rgba(0,0,0,0.05)'}, border:{display:false} },
+    y:{ ticks:{color:'#8b98ac', font:{size:9}},
+        grid:{color:'rgba(0,0,0,0.05)'}, border:{display:false} }
   }
 });
 
@@ -715,17 +1032,155 @@ const mainChart2 = new Chart(document.getElementById('chart-main2'),{
   type:'line', data:{labels:[], datasets:[]}, options: chartOpts()
 });
 
+// ── Demo-трафик поверх верхних графиков DL/UL Throughput ──────────────────────
+function pushDemoPoint(chart, ueId, value){
+  const label = new Date().toISOString();
+  chart.data.labels.push(label);
+  let ds = chart.data.datasets.find(d=>d._demoUe===ueId);
+  if(!ds){
+    // New label was already pushed above, so sizing data off the current
+    // labels length here gives ds exactly one slot per existing label,
+    // including the one just added — set below.
+    ds = {
+      label:`UE${ueId} (демо)`, data: chart.data.labels.map(()=>null),
+      borderColor:'#b8305c', backgroundColor:'#b8305c18',
+      borderWidth:2, pointRadius:2, pointHoverRadius:4, tension:0.4, borderDash:[4,3], fill:false,
+      _demoUe: ueId,
+    };
+    chart.data.datasets.push(ds);
+    ds.data[ds.data.length-1] = value;
+  } else {
+    // Must grow ds.data by exactly one element (not overwrite the last one) —
+    // otherwise, on every tick after the first, this dataset's array silently
+    // stays frozen at length 1 while chart.data.labels keeps growing, so the
+    // line never actually advances across the x-axis: it just keeps
+    // overwriting the same first point forever while the axis grows under it.
+    ds.data.push(value);
+  }
+  // Pad every OTHER dataset (real series, or other UEs' demo overlays) with a
+  // null for this new label so all datasets stay the same length as labels.
+  chart.data.datasets.forEach(d=>{ if(d._demoUe !== ueId) d.data.push(null); });
+  if(chart.data.labels.length > 200){
+    chart.data.labels.shift();
+    chart.data.datasets.forEach(d=>d.data.shift());
+  }
+  chart.update();
+}
+function removeDemoDataset(chart, ueId){
+  chart.data.datasets = chart.data.datasets.filter(d=>d._demoUe!==ueId);
+  chart.update();
+}
+function pushDemoToMainCharts(ueId, dl, ul){
+  const m1 = document.getElementById('sel-metric').value;
+  const m2 = document.getElementById('sel-metric2').value;
+  if(m1==='dl') pushDemoPoint(mainChart, ueId, dl);
+  else if(m1==='ul') pushDemoPoint(mainChart, ueId, ul);
+  if(m2==='dl') pushDemoPoint(mainChart2, ueId, dl);
+  else if(m2==='ul') pushDemoPoint(mainChart2, ueId, ul);
+}
+function clearDemoFromMainCharts(ueId){
+  removeDemoDataset(mainChart, ueId);
+  removeDemoDataset(mainChart2, ueId);
+}
+
+// ── Testbed control ───────────────────────────────────────────────────────────
+function startTestbed(){
+  if(!IS_ADMIN) return;
+  const n = parseInt(document.getElementById('sel-n-ues').value);
+  document.getElementById('btn-testbed-start').disabled = true;
+  post('/api/testbed/start/', {n})
+    .then(d=>{ log(d.ok ? `Запуск стенда (${n} UE)...` : 'Ошибка запуска: '+d.error, d.ok?'ok':'err'); })
+    .catch(()=>log('Ошибка запуска стенда','err'));
+}
+function stopTestbed(){
+  if(!IS_ADMIN) return;
+  post('/api/testbed/stop/', {})
+    .then(d=>{ log(d.ok ? 'Остановка стенда...' : 'Ошибка остановки: '+d.error, d.ok?'ok':'err'); })
+    .catch(()=>log('Ошибка остановки стенда','err'));
+}
+function fetchTestbedStatus(){
+  fetch('/api/testbed/status/').then(r=>r.json()).then(d=>{
+    setBadge('testbed', !!d.running);
+    document.getElementById('testbed-status-text').textContent =
+      d.starting ? 'Запускается...' : d.stopping ? 'Останавливается...' : (d.running ? 'Запущен' : 'Остановлен');
+    document.getElementById('btn-testbed-start').disabled = !!(d.running || d.starting || d.stopping);
+    document.getElementById('btn-testbed-stop').disabled = !!(!d.running && !d.starting) || d.stopping;
+    if(d.n_ues && d.n_ues !== state.ues.length) rebuildUEState(d.n_ues);
+    state.testbedRunning = !!d.running;
+  }).catch(()=>setBadge('testbed', false));
+}
+
+// ── Traffic demo button (чисто визуальная анимация, без реального трафика) ────
+function runTraffic(ueId){
+  if(!IS_ADMIN) return;
+  const ue = state.ues[ueId-1];
+  if(!ue || ue.trafficRunning) return;
+  ue.trafficRunning = true;
+  demoActiveUes.add(ueId);
+  const btn = document.getElementById(`traffic-btn-${ueId}`);
+  if(btn){ btn.disabled = true; btn.textContent = 'Идёт трафик...'; }
+  log(`UE${ueId}: демо-трафик (8 сек)...`);
+
+  const totalTicks = 8;
+  const peakDl = 8 + Math.random()*8;   // 8-16 Mbps
+  const peakUl = 3 + Math.random()*5;   // 3-8 Mbps
+  let tick = 0;
+  const timer = setInterval(()=>{
+    tick++;
+    const phase = tick <= totalTicks/2 ? tick/(totalTicks/2) : (totalTicks-tick)/(totalTicks/2);
+    const jitter = () => 0.85 + Math.random()*0.3;
+    ue.dl = +(peakDl * phase * jitter()).toFixed(2);
+    ue.ul = +(peakUl * phase * jitter()).toFixed(2);
+    updateUECards();
+    updateTopMetrics();
+    pushUEChartPoint(ueId, ue.dl, ue.ul);
+    pushDemoToMainCharts(ueId, ue.dl, ue.ul);
+    if(tick >= totalTicks){
+      clearInterval(timer);
+      ue.dl = 0; ue.ul = 0;
+      ue.trafficRunning = false;
+      updateUECards();
+      updateTopMetrics();
+      pushUEChartPoint(ueId, 0, 0);
+      setTimeout(()=>{ clearDemoFromMainCharts(ueId); demoActiveUes.delete(ueId); }, 1500);
+      if(btn){ btn.disabled = false; btn.textContent = '▶ Трафик (демо)'; }
+      log(`UE${ueId}: демо-трафик завершён`, 'ok');
+    }
+  }, 1000);
+}
+
 // ── Boot ──────────────────────────────────────────────────────────────────────
-buildUEs();
+rebuildUEState(1);
 log('Дашборд запущен','ok');
 log('Подключение к InfluxDB...');
 log('Подключение к GNU Radio XML-RPC...');
 
+function fetchGnrStatus(){
+  fetch('/api/gnr/status/').then(r=>r.json()).then(d=>{
+    setBadge('gnr', d.ok);
+    if(!d.ok && d.error) log('GNU Radio: '+d.error,'err');
+  }).catch(()=>setBadge('gnr',false));
+}
+
+// Deep link from scenario run history: /?start=<iso>&end=<iso>
+let rangePrefilled = false;
+(function prefillRangeFromQuery(){
+  const q = new URLSearchParams(window.location.search);
+  const start = q.get('start'), end = q.get('end');
+  if(start && end){ setCustomRangeFromISO(start, end); rangePrefilled = true; }
+})();
+
 fetchStats();
-loadHistory();
-loadHistory2();
+fetchGnrStatus();
+fetchTestbedStatus();
+if(!rangePrefilled){ loadHistory(); loadHistory2(); }
+scheduleChartRefresh();
+loadScenarioCatalog();
+checkForActiveScenarioRun();
+setInterval(checkForActiveScenarioRun, 5000);
 setInterval(fetchStats, 1000);
-setInterval(()=>{ loadHistory(); loadHistory2(); }, 30000);
+setInterval(fetchGnrStatus, 3000);
+setInterval(fetchTestbedStatus, 3000);
 </script>
 </body>
 </html>

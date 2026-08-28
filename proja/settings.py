@@ -1,9 +1,13 @@
+import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = 'change-me-in-production'
-DEBUG = True
-ALLOWED_HOSTS = ['*']
+load_dotenv(BASE_DIR / '.env')
+
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'change-me-in-production')
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '*').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -58,9 +62,16 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# InfluxDB v1
-INFLUX_URL = 'http://localhost:8086'
-INFLUX_DB = 'srsran'
+# InfluxDB (v2 с v1-compat endpoint)
+INFLUX_URL = os.environ.get('INFLUX_URL', 'http://localhost:8086')
+INFLUX_DB = os.environ.get('INFLUX_DB', 'srsran')
+INFLUX_TOKEN = os.environ.get('INFLUX_TOKEN', '')
 
 # GNU Radio XML-RPC
-GNURADIO_URL = 'http://localhost:8080/RPC2'
+GNURADIO_URL = os.environ.get('GNURADIO_URL', 'http://localhost:8080/RPC2')
+
+# Host testbed control helper (stdlib http.server, runs as plain user via screen)
+TESTBED_HELPER_URL = os.environ.get('TESTBED_HELPER_URL', 'http://localhost:8090')
+
+# Ollama
+OLLAMA_URL = os.environ.get('OLLAMA_URL', 'http://localhost:11434')

@@ -1,0 +1,79 @@
+slug: early_warning
+name: "Early-warning прогон"
+description: >
+  Длительный прогон с постоянно работающим metrics bridge (пишет в InfluxDB
+  как обычно) и лёгкой фоновой DL-нагрузкой, чтобы был транспортный сигнал
+  для последующего обучения/проверки модели раннего предупреждения о
+  bottleneck. Каждую минуту — контрольная точка (snapshot_metrics) в логе
+  прогона. background_load_mbps=0 отключает нагрузку, но сохраняет минутный
+  ритм (шаг load_dl с нулевым битрейтом вырождается в простое ожидание).
+  При background_load_mbps > 0 нагрузка реальная (iperf3-клиент внутри
+  netns UE) — проверено на реальном прогоне 17.08.2026.
+
+parameters:
+  n_ue:
+    type: int
+    default: 2
+    min: 1
+    max: 7
+    label: "Число UE"
+  duration_min:
+    type: int
+    default: 60
+    min: 1
+    max: 720
+    label: "Общая длительность, мин"
+  background_load_mbps:
+    type: float
+    default: 2
+    min: 0
+    max: 50
+    label: "Фоновая DL-нагрузка на UE, Мбит/с (0 = без нагрузки)"
+
+steps:
+  - type: component_start
+    component: gnuradio
+    params: {n: "{{n_ue}}"}
+  - type: wait_ready
+    component: gnuradio
+    timeout_s: 40
+
+  - type: component_start
+    component: gnb
+  - type: wait_ready
+    component: gnb
+    timeout_s: 30
+
+  - type: component_start
+    component: ue
+    params: {n: "{{n_ue}}"}
+  - type: wait_ready
+    component: ue
+    n: "{{n_ue}}"
+    timeout_s: 40
+    timeout_s_per_ue: 20
+
+  - type: component_start
+    component: bridge
+
+  - type: snapshot_metrics
+    label: "run start"
+
+  - type: repeat
+    count: "{{duration_min}}"
+    steps:
+      - type: load_dl
+        n: "{{n_ue}}"
+        bitrate_mbps: "{{background_load_mbps}}"
+        duration_s: 60
+      - type: snapshot_metrics
+        label: "checkpoint"
+
+  - type: component_stop
+    component: bridge
+  - type: component_stop
+    component: ue
+  - type: component_stop
+    component: gnb
+  - type: component_stop
+    component: gnuradio

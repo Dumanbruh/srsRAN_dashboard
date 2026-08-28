@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Сценарии — KazNU 5G Project</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f4f6fb;--bg2:#ffffff;--bg3:#eef1f7;--bg4:#e4e9f1;
+  --border:rgba(47,111,176,0.15);--border2:rgba(47,111,176,0.3);
+  --text:#1a2233;--text2:#5b6b85;--text3:#8b98ac;
+  --blue:#2f6fb0;--blue-bg:rgba(47,111,176,0.08);
+  --green:#178a63;--green-bg:rgba(23,138,99,0.08);
+  --red:#c73e3d;--red-bg:rgba(199,62,61,0.08);
+  --amber:#b9790a;--amber-bg:rgba(185,121,10,0.1);
+  --pink:#b8305c;
+  --mono:'Share Tech Mono',monospace;
+  --sans:'Exo 2',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;min-height:100vh;
+  background-image:
+    radial-gradient(ellipse at 0% 0%, rgba(47,111,176,0.04) 0%,transparent 50%),
+    radial-gradient(ellipse at 100% 100%, rgba(23,138,99,0.04) 0%,transparent 50%);
+}
+
+.layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh;}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:1.2rem 0;}
+.sb-logo{padding:0 1.2rem 1.5rem;border-bottom:1px solid var(--border);}
+.sb-logo-text{font-family:var(--mono);font-size:18px;letter-spacing:0.1em;}
+.sb-logo-text span{color:var(--blue);}
+.sb-logo-sub{font-size:10px;color:var(--text3);letter-spacing:0.2em;text-transform:uppercase;margin-top:4px;}
+.sb-section{padding:1rem 1.2rem 0.5rem;font-size:9px;color:var(--text3);letter-spacing:0.2em;text-transform:uppercase;}
+.sb-link{display:flex;align-items:center;gap:10px;padding:8px 1.2rem;color:var(--text2);cursor:pointer;
+  font-size:12px;transition:all 0.15s;border-left:2px solid transparent;}
+.sb-link:hover{color:var(--text);background:var(--bg3);}
+.sb-link.active{color:var(--blue);border-left-color:var(--blue);background:var(--blue-bg);}
+.sb-link .icon{width:14px;height:14px;opacity:0.7;}
+.sb-bottom{margin-top:auto;padding:1rem 1.2rem;border-top:1px solid var(--border);}
+.sb-user{display:flex;align-items:center;gap:8px;}
+.sb-avatar{width:28px;height:28px;border-radius:50%;background:var(--blue-bg);border:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--blue);font-family:var(--mono);}
+.sb-uname{font-size:12px;color:var(--text);}
+.sb-role{font-size:10px;color:var(--text3);}
+.sb-logout{display:block;margin-top:10px;font-size:11px;color:var(--text3);text-decoration:none;
+  padding:6px 10px;border:1px solid var(--border);border-radius:3px;text-align:center;transition:all 0.15s;}
+.sb-logout:hover{color:var(--red);border-color:rgba(226,75,74,0.3);}
+
+.main{overflow:auto;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;
+  border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:10;}
+.page-title{font-size:14px;font-weight:600;color:var(--text);}
+.content{padding:1.5rem;}
+
+.badge{font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid;display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;}
+.badge.idle{background:var(--bg3);color:var(--text3);border-color:var(--border);}
+.badge.idle::before{background:var(--text3);}
+.badge.running{background:var(--blue-bg);color:var(--blue);border-color:rgba(47,111,176,0.4);}
+.badge.running::before{background:var(--blue);animation:blink 1.2s infinite;}
+.badge.completed{background:var(--green-bg);color:var(--green);border-color:rgba(23,138,99,0.3);}
+.badge.completed::before{background:var(--green);}
+.badge.failed{background:var(--red-bg);color:var(--red);border-color:rgba(199,62,61,0.3);}
+.badge.failed::before{background:var(--red);}
+.badge.stopped{background:var(--amber-bg);color:var(--amber);border-color:rgba(185,121,10,0.3);}
+.badge.stopped::before{background:var(--amber);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+
+.section-title{font-size:11px;color:var(--text3);letter-spacing:0.15em;text-transform:uppercase;margin:1.5rem 0 0.75rem;}
+.section-title:first-child{margin-top:0;}
+
+/* ── Active run panel ── */
+.run-panel{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1rem;margin-bottom:1rem;}
+.run-panel-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;flex-wrap:wrap;gap:8px;}
+.run-panel-title{font-family:var(--mono);font-size:13px;}
+.run-meta{font-size:11px;color:var(--text3);margin-top:2px;}
+.btn{padding:6px 14px;border-radius:3px;border:1px solid var(--border);background:var(--bg3);
+  color:var(--text2);cursor:pointer;font-family:var(--sans);font-size:11px;transition:all 0.15s;}
+.btn:hover{border-color:var(--border2);color:var(--text);}
+.btn:disabled{opacity:0.35;cursor:default;}
+.btn.primary{background:var(--blue-bg);color:var(--blue);border-color:rgba(47,111,176,0.4);}
+.btn.primary:hover{background:rgba(47,111,176,0.15);}
+.btn.danger{background:var(--red-bg);color:var(--red);border-color:rgba(199,62,61,0.3);}
+.btn.danger:hover{background:rgba(199,62,61,0.15);}
+.no-run{color:var(--text3);font-size:12px;padding:0.5rem 0;}
+
+.log-box{height:220px;overflow-y:auto;background:var(--bg3);border-radius:3px;padding:8px;font-family:var(--mono);font-size:11px;}
+.log-box::-webkit-scrollbar{width:3px;}
+.log-box::-webkit-scrollbar-thumb{background:var(--bg4);}
+.log-line{padding:2px 0;display:flex;gap:8px;}
+.log-step{color:var(--text3);min-width:26px;flex-shrink:0;text-align:right;}
+.log-msg{color:var(--text2);}
+.log-line.warn .log-msg{color:var(--amber);}
+.log-line.error .log-msg{color:var(--red);}
+
+/* ── Scenario cards ── */
+.scenario-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin-bottom:1rem;}
+.scard{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1rem;display:flex;flex-direction:column;}
+.scard-name{font-size:13px;font-weight:600;margin-bottom:4px;}
+.scard-desc{font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:0.75rem;flex-grow:0;}
+.scard-form{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:0.75rem;}
+.field{display:flex;flex-direction:column;gap:3px;}
+.field.full{grid-column:1/-1;}
+.field label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;}
+.field input[type=number],.field input[type=text]{padding:5px 7px;border-radius:3px;border:1px solid var(--border);
+  background:var(--bg3);color:var(--text);font-family:var(--mono);font-size:11px;outline:none;}
+.field input[type=number]:focus,.field input[type=text]:focus{border-color:var(--border2);}
+.field.checkbox{flex-direction:row;align-items:center;gap:6px;}
+.field.checkbox label{text-transform:none;font-size:11px;color:var(--text2);letter-spacing:0;}
+.scard-actions{display:flex;justify-content:flex-end;margin-top:auto;}
+
+/* ── History table ── */
+.history-table{width:100%;border-collapse:collapse;background:var(--bg2);border:1px solid var(--border);border-radius:4px;overflow:hidden;}
+.history-table th{text-align:left;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;
+  padding:8px 10px;border-bottom:1px solid var(--border);background:var(--bg3);}
+.history-table td{padding:8px 10px;border-bottom:1px solid var(--border);font-size:11px;vertical-align:middle;}
+.history-table tr:last-child td{border-bottom:none;}
+.history-table tr:hover td{background:var(--bg3);}
+.hist-link{color:var(--blue);text-decoration:none;font-size:10px;margin-right:10px;}
+.hist-link:hover{text-decoration:underline;}
+.params-summary{font-family:var(--mono);font-size:10px;color:var(--text3);}
+.empty-hint{color:var(--text3);font-size:12px;padding:1rem;text-align:center;}
+
+.viewer-only-hint{font-size:10px;color:var(--text3);font-style:italic;}
+body.viewer .admin-only{display:none !important;}
+</style>
+</head>
+<body class="{% if not is_admin %}viewer{% endif %}">
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-text">Kaz<span>NU</span></div>
+      <div class="sb-logo-sub">5G Project</div>
+    </div>
+    <div class="sb-section">Навигация</div>
+    <a href="/" class="sb-link" style="text-decoration:none">
+      <svg class="icon" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+      Дашборд
+    </a>
+    <div class="sb-section">Автоматизация</div>
+    <div class="sb-link active">
+      <svg class="icon" viewBox="0 0 16 16" fill="currentColor"><polygon points="4,2 13,8 4,14" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/></svg>
+      Сценарии
+    </div>
+    <div class="sb-section">AI</div>
+    <a href="/ai/" class="sb-link" style="text-decoration:none">
+      <svg class="icon" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M5 9.5c0-1.5 1-2.5 3-2.5s3 1 3 2.5" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/><circle cx="6" cy="6.5" r="0.8"/><circle cx="10" cy="6.5" r="0.8"/></svg>
+      AI Ассистент
+    </a>
+    <div class="sb-bottom">
+      <div class="sb-user">
+        <div class="sb-avatar">{{ user.username|first|upper }}</div>
+        <div>
+          <div class="sb-uname">{{ user.username }}</div>
+          <div class="sb-role">{{ user.role }}</div>
+        </div>
+      </div>
+      <a href="/logout/" class="sb-logout">Выйти</a>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="page-title">Сценарии</div>
+      <div id="topbar-run-badge"></div>
+    </div>
+
+    <div class="content">
+
+      <div class="section-title">Текущий прогон</div>
+      <div class="run-panel" id="run-panel">
+        <div class="no-run" id="no-run-hint">Сейчас ничего не выполняется.</div>
+      </div>
+
+      <div class="section-title">Каталог сценариев</div>
+      {% if not is_admin %}<div class="viewer-only-hint" style="margin-bottom:0.75rem">Роль viewer — запуск/остановка недоступны, только просмотр.</div>{% endif %}
+      <div class="scenario-grid" id="scenario-grid"></div>
+
+      <div class="section-title">История прогонов</div>
+      <div id="history-wrap">
+        <table class="history-table" id="history-table">
+          <thead>
+            <tr><th>Сценарий</th><th>Параметры</th><th>Статус</th><th>Начало</th><th>Длительность</th><th></th></tr>
+          </thead>
+          <tbody id="history-tbody"></tbody>
+        </table>
+        <div class="empty-hint" id="history-empty" style="display:none">Прогонов ещё не было.</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const IS_ADMIN = {{ is_admin|yesno:"true,false" }};
+
+function getCsrf(){
+  return document.cookie.split(';').map(c=>c.trim()).find(c=>c.startsWith('csrftoken='))?.split('=')[1] || '';
+}
+function post(url, data){
+  return fetch(url, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-CSRFToken':getCsrf()},
+    body: JSON.stringify(data || {})
+  }).then(r=>r.json());
+}
+
+let scenarios = [];
+let activeRunId = null;
+let activeEventSource = null;
+
+// ── Catalog ──────────────────────────────────────────────────────────────────
+
+function fieldInput(key, spec){
+  const val = spec.default;
+  const label = spec.label || key;
+  if(spec.type === 'bool'){
+    return `<div class="field checkbox full">
+      <input type="checkbox" id="p-${key}" ${val ? 'checked' : ''}>
+      <label for="p-${key}">${label}</label>
+    </div>`;
+  }
+  if(spec.type === 'int' || spec.type === 'float'){
+    const step = spec.type === 'int' ? '1' : 'any';
+    const minAttr = spec.min !== undefined && spec.min !== null ? `min="${spec.min}"` : '';
+    const maxAttr = spec.max !== undefined && spec.max !== null ? `max="${spec.max}"` : '';
+    return `<div class="field">
+      <label>${label}</label>
+      <input type="number" id="p-${key}" value="${val}" step="${step}" ${minAttr} ${maxAttr}>
+    </div>`;
+  }
+  return `<div class="field">
+    <label>${label}</label>
+    <input type="text" id="p-${key}" value="${val ?? ''}">
+  </div>`;
+}
+
+function collectParams(slug, parameters){
+  const out = {};
+  for(const key in parameters){
+    const el = document.getElementById(`f-${slug}-p-${key}`);
+    if(!el) continue;
+    out[key] = (parameters[key].type === 'bool') ? el.checked : el.value;
+  }
+  return out;
+}
+
+function renderCatalog(){
+  const grid = document.getElementById('scenario-grid');
+  grid.innerHTML = scenarios.map(s => {
+    const fields = Object.entries(s.parameters || {}).map(([key, spec]) =>
+      fieldInput(key, spec).replace(`id="p-${key}"`, `id="f-${s.slug}-p-${key}"`)
+    ).join('');
+    return `<div class="scard">
+      <div class="scard-name">${s.name}</div>
+      <div class="scard-desc">${s.description || ''}</div>
+      <div class="scard-form">${fields}</div>
+      <div class="scard-actions">
+        <button class="btn primary admin-only" onclick="runScenario('${s.slug}')" ${IS_ADMIN ? '' : 'disabled'}>Запустить</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function loadCatalog(){
+  fetch('/api/scenarios/').then(r=>r.json()).then(d=>{
+    if(!d.ok) return;
+    scenarios = d.scenarios;
+    renderCatalog();
+  });
+}
+
+function runScenario(slug){
+  const s = scenarios.find(x => x.slug === slug);
+  const params = collectParams(slug, s.parameters || {});
+  post(`/api/scenarios/${slug}/run/`, params).then(d=>{
+    if(!d.ok){ alert('Ошибка запуска: ' + d.error); return; }
+    attachRun(d.run.id);
+    loadHistory();
+  });
+}
+
+// ── Active run panel ─────────────────────────────────────────────────────────
+
+function statusLabel(status){
+  return {idle:'ожидание', running:'выполняется', completed:'завершён',
+          failed:'ошибка', stopped:'остановлен'}[status] || status;
+}
+
+function renderRunPanel(run){
+  document.getElementById('topbar-run-badge').innerHTML =
+    run ? `<span class="badge ${run.status}">${run.scenario_name} — ${statusLabel(run.status)}</span>` : '';
+
+  const panel = document.getElementById('run-panel');
+  if(!run){
+    panel.innerHTML = '<div class="no-run" id="no-run-hint">Сейчас ничего не выполняется.</div>';
+    return;
+  }
+  // Preserve already-streamed log lines across re-renders of the same run —
+  // renderRunPanel is called again on the SSE 'done' event, and rebuilding
+  // the whole panel would otherwise wipe out everything appendLogLine() added.
+  const existingBox = document.getElementById('run-log-box');
+  const preservedLog = (existingBox && existingBox.dataset.runId === String(run.id)) ? existingBox.innerHTML : '';
+
+  const canStop = run.status === 'running' && IS_ADMIN;
+  panel.innerHTML = `
+    <div class="run-panel-hd">
+      <div>
+        <div class="run-panel-title">#${run.id} ${run.scenario_name}</div>
+        <div class="run-meta">шаг ${run.current_step ?? '—'} · параметры: <span class="params-summary">${JSON.stringify(run.params)}</span></div>
+        ${run.error ? `<div class="run-meta" style="color:var(--red)">ошибка: ${run.error}</div>` : ''}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="badge ${run.status}">${statusLabel(run.status)}</span>
+        <button class="btn danger admin-only" onclick="stopRun(${run.id})" ${canStop ? '' : 'disabled'}>Остановить</button>
+      </div>
+    </div>
+    <div class="log-box" id="run-log-box" data-run-id="${run.id}">${preservedLog}</div>
+  `;
+  const box = document.getElementById('run-log-box');
+  box.scrollTop = box.scrollHeight;
+}
+
+function appendLogLine(payload){
+  const box = document.getElementById('run-log-box');
+  if(!box) return;
+  const el = document.createElement('div');
+  el.className = 'log-line ' + (payload.level || '');
+  const step = payload.step !== null && payload.step !== undefined ? payload.step : '';
+  el.innerHTML = `<span class="log-step">${step}</span><span class="log-msg">${payload.message}</span>`;
+  box.appendChild(el);
+  box.scrollTop = box.scrollHeight;
+}
+
+function attachRun(runId){
+  if(activeEventSource){ activeEventSource.close(); activeEventSource = null; }
+  activeRunId = runId;
+
+  fetch(`/api/runs/${runId}/`).then(r=>r.json()).then(d=>{
+    if(!d.ok) return;
+    renderRunPanel(d.run);
+  });
+
+  const es = new EventSource(`/api/runs/${runId}/logs/stream/`);
+  activeEventSource = es;
+  es.onmessage = (ev) => {
+    const payload = JSON.parse(ev.data);
+    appendLogLine(payload);
+  };
+  es.addEventListener('done', () => {
+    es.close();
+    if(activeEventSource === es) activeEventSource = null;
+    fetch(`/api/runs/${runId}/`).then(r=>r.json()).then(d=>{
+      if(d.ok) renderRunPanel(d.run);
+      loadHistory();
+    });
+  });
+  es.onerror = () => { /* EventSource retries on its own; nothing to do */ };
+}
+
+function stopRun(runId){
+  post(`/api/runs/${runId}/stop/`).then(d=>{
+    if(!d.ok) alert('Не удалось остановить: ' + d.error);
+  });
+}
+
+// On load: if something is already running (e.g. page reload mid-run), reattach to it.
+function checkForActiveRun(){
+  if(activeRunId) return;
+  fetch('/api/runs/?limit=5').then(r=>r.json()).then(d=>{
+    if(!d.ok) return;
+    const running = d.runs.find(r => r.status === 'running');
+    if(running) attachRun(running.id);
+  });
+}
+
+// ── History ──────────────────────────────────────────────────────────────────
+
+function fmtDuration(startISO, endISO){
+  if(!startISO) return '—';
+  const start = new Date(startISO);
+  const end = endISO ? new Date(endISO) : new Date();
+  const s = Math.round((end - start) / 1000);
+  if(s < 60) return `${s}с`;
+  if(s < 3600) return `${Math.floor(s/60)}м ${s%60}с`;
+  return `${Math.floor(s/3600)}ч ${Math.floor((s%3600)/60)}м`;
+}
+
+function loadHistory(){
+  fetch('/api/runs/?limit=30').then(r=>r.json()).then(d=>{
+    if(!d.ok) return;
+    const tbody = document.getElementById('history-tbody');
+    document.getElementById('history-empty').style.display = d.runs.length ? 'none' : 'block';
+    tbody.innerHTML = d.runs.map(r => {
+      const dataLink = r.started_at
+        ? `<a class="hist-link" href="/?start=${encodeURIComponent(r.started_at)}&end=${encodeURIComponent(r.finished_at || new Date().toISOString())}">данные →</a>`
+        : '';
+      return `<tr>
+        <td>${r.scenario_name}</td>
+        <td class="params-summary">${JSON.stringify(r.params)}</td>
+        <td><span class="badge ${r.status}">${statusLabel(r.status)}</span></td>
+        <td>${r.started_at ? new Date(r.started_at).toLocaleString('ru-RU') : '—'}</td>
+        <td>${fmtDuration(r.started_at, r.finished_at)}</td>
+        <td>${dataLink}<a class="hist-link" href="javascript:void(0)" onclick="attachRun(${r.id})">лог →</a></td>
+      </tr>`;
+    }).join('');
+  });
+}
+
+loadCatalog();
+loadHistory();
+checkForActiveRun();
+setInterval(loadHistory, 8000);
+setInterval(checkForActiveRun, 5000);
+</script>
+</body>
+</html>

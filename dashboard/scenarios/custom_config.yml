@@ -1,0 +1,114 @@
+slug: custom_config
+name: "Произвольная конфигурация"
+description: >
+  Разовый прогон с параметрами, которые пользователь задаёт вручную в форме:
+  число UE, время удержания, опциональная DL-нагрузка, опциональное
+  изменение pathloss (эмуляция движения). Тот же движок, что и у готовых
+  сценариев — просто более общий набор параметров с шагами, включаемыми по
+  условию (enabled_if). apply_load=true запускает реальную DL-нагрузку
+  (iperf3-клиент внутри netns UE, testbed_root_ops.sh iperf_client) —
+  проверено на реальном прогоне 17.08.2026.
+
+parameters:
+  n_ue:
+    type: int
+    default: 1
+    min: 1
+    max: 7
+    label: "Число UE"
+  hold_s:
+    type: int
+    default: 60
+    min: 5
+    max: 3600
+    label: "Время удержания сети поднятой, с"
+  apply_load:
+    type: bool
+    default: false
+    label: "Включить DL-нагрузку"
+  load_bitrate_mbps:
+    type: float
+    default: 10
+    min: 0.5
+    max: 100
+    label: "DL-нагрузка, Мбит/с"
+  load_duration_s:
+    type: int
+    default: 30
+    min: 5
+    max: 1800
+    label: "Длительность DL-нагрузки, с"
+  apply_mobility:
+    type: bool
+    default: false
+    label: "Включить изменение pathloss (эмуляция движения)"
+  pathloss_target_db:
+    type: float
+    default: 40
+    min: 0
+    max: 100
+    label: "Целевой pathloss, дБ"
+  pathloss_ramp_s:
+    type: int
+    default: 15
+    min: 2
+    max: 300
+    label: "Длительность перехода pathloss, с"
+
+steps:
+  - type: component_start
+    component: gnuradio
+    params: {n: "{{n_ue}}"}
+  - type: wait_ready
+    component: gnuradio
+    timeout_s: 40
+
+  - type: component_start
+    component: gnb
+  - type: wait_ready
+    component: gnb
+    timeout_s: 30
+
+  - type: component_start
+    component: ue
+    params: {n: "{{n_ue}}"}
+  - type: wait_ready
+    component: ue
+    n: "{{n_ue}}"
+    timeout_s: 40
+    timeout_s_per_ue: 20
+
+  - type: component_start
+    component: bridge
+
+  - type: snapshot_metrics
+    label: "network up"
+
+  - type: ramp_pathloss
+    enabled_if: "{{apply_mobility}}"
+    ue_id: 1
+    from: 0
+    to: "{{pathloss_target_db}}"
+    duration_s: "{{pathloss_ramp_s}}"
+    steps: 20
+
+  - type: load_dl
+    enabled_if: "{{apply_load}}"
+    n: "{{n_ue}}"
+    bitrate_mbps: "{{load_bitrate_mbps}}"
+    duration_s: "{{load_duration_s}}"
+
+  - type: sleep
+    duration_s: "{{hold_s}}"
+
+  - type: snapshot_metrics
+    label: "before teardown"
+
+  - type: component_stop
+    component: bridge
+  - type: component_stop
+    component: ue
+  - type: component_stop
+    component: gnb
+  - type: component_stop
+    component: gnuradio
