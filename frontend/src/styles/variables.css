@@ -1,0 +1,30 @@
+html {
+  font-size: 17px; /* real (non-zoom) size bump — base is 16px elsewhere */
+}
+
+:root {
+  --bg: #f4f6fb;
+  --bg2: #ffffff;
+  --bg3: #eef1f7;
+  --bg4: #e4e9f1;
+  --border: rgba(52, 124, 190, 0.15);
+  --border2: rgba(52, 124, 190, 0.3);
+  --text: #313d5c;
+  --text2: #5b6b85;
+  --text3: #8b98ac;
+  --navy: #313d5c;
+  --navy2: #46527a;
+  --blue: #347cbe;
+  --blue-bg: rgba(52, 124, 190, 0.08);
+  --gold: #dfa359;
+  --gold-bg: rgba(223, 163, 89, 0.14);
+  --green: #178a63;
+  --green-bg: rgba(23, 138, 99, 0.08);
+  --red: #c73e3d;
+  --red-bg: rgba(199, 62, 61, 0.08);
+  --amber: #dfa359;
+  --amber-bg: rgba(223, 163, 89, 0.12);
+  --pink: #b8305c;
+  --mono: 'Share Tech Mono', monospace;
+  --sans: 'Exo 2', sans-serif;
+}

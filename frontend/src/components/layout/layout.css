@@ -1,0 +1,37 @@
+.layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+
+.sidebar { background: var(--navy); display: flex; flex-direction: column; padding: 1.4rem 0; }
+.sb-logo { padding: 0 1.4rem 1.6rem; border-bottom: 1px solid rgba(255, 255, 255, 0.14); }
+.sb-logo-text { font-family: var(--mono); font-size: 21px; letter-spacing: 0.1em; color: #fff; }
+.sb-logo-text span { color: var(--gold); }
+.sb-logo-sub { font-size: 11px; color: rgba(255, 255, 255, 0.5); letter-spacing: 0.2em; text-transform: uppercase; margin-top: 5px; }
+.sb-section { padding: 1.1rem 1.4rem 0.6rem; font-size: 10px; color: rgba(255, 255, 255, 0.35); letter-spacing: 0.2em; text-transform: uppercase; }
+.sb-link {
+  display: flex; align-items: center; gap: 11px; padding: 10px 1.4rem; color: rgba(255, 255, 255, 0.72);
+  cursor: pointer; font-size: 13px; transition: all 0.15s; border-left: 3px solid transparent; text-decoration: none;
+}
+.sb-link:hover { color: #fff; background: rgba(255, 255, 255, 0.07); }
+.sb-link.active { color: var(--gold); border-left-color: var(--gold); background: rgba(223, 163, 89, 0.14); }
+.sb-bottom { margin-top: auto; padding: 1.1rem 1.4rem; border-top: 1px solid rgba(255, 255, 255, 0.14); }
+.sb-user { display: flex; align-items: center; gap: 9px; }
+.sb-avatar {
+  width: 32px; height: 32px; border-radius: 50%; background: rgba(223, 163, 89, 0.18);
+  border: 1px solid rgba(223, 163, 89, 0.45); display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: var(--gold); font-family: var(--mono);
+}
+.sb-uname { font-size: 13px; color: #fff; }
+.sb-role { font-size: 11px; color: rgba(255, 255, 255, 0.5); }
+.sb-logout {
+  display: block; margin-top: 11px; font-size: 12px; color: rgba(255, 255, 255, 0.55); text-decoration: none;
+  padding: 7px 10px; border: 1px solid rgba(255, 255, 255, 0.18); border-radius: 3px; text-align: center; transition: all 0.15s;
+}
+.sb-logout:hover { color: #ff9d9c; border-color: rgba(226, 75, 74, 0.5); }
+
+.main { overflow: auto; }
+.topbar {
+  display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.7rem;
+  border-bottom: 3px solid var(--gold); background: var(--bg2); position: sticky; top: 0; z-index: 10;
+}
+.page-title { font-size: 16px; font-weight: 600; color: var(--text); }
+.status-row { display: flex; gap: 9px; }
+.page-body { padding: 1.4rem 1.7rem; }

@@ -1,0 +1,15 @@
+.git
+__pycache__
+*.pyc
+*.pyo
+.env
+db.sqlite3
+db.sqlite3.bak-*
+staticfiles/
+*.log
+venv/
+.venv/
+
+frontend/node_modules
+frontend/dist
+dashboard/static/spa

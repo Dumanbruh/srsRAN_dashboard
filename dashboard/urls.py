@@ -1,9 +1,11 @@
 from django.urls import path
-from . import views
+from . import views, spa
 
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('scenarios/', views.scenarios_page, name='scenarios_page'),
+    path('', spa.spa_shell, name='index'),
+    path('scenarios/', spa.spa_shell, name='scenarios_page'),
+    path('api/whoami/', spa.api_whoami, name='api_whoami'),
+    path('api/csrf/', spa.api_csrf, name='api_csrf'),
     # read
     path('api/stats/', views.api_stats, name='api_stats'),
     path('api/history/', views.api_history, name='api_history'),
@@ -25,7 +27,7 @@ urlpatterns = [
     path('api/testbed/components/<str:name>/stop/', views.api_component_stop, name='api_component_stop'),
     path('api/testbed/components/<str:name>/logs/stream/', views.api_component_logs_stream, name='api_component_logs_stream'),
     # AI
-    path('ai/', views.ai_page, name='ai_page'),
+    path('ai/', spa.spa_shell, name='ai_page'),
     path('api/ai/insight/', views.api_ai_insight, name='api_ai_insight'),
     path('api/ai/chat/', views.api_ai_chat, name='api_ai_chat'),
     # scenario engine (admin only for run/stop, read for any logged-in user)

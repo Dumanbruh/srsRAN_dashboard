@@ -11,51 +11,53 @@
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#f4f6fb;--bg2:#ffffff;--bg3:#eef1f7;--bg4:#e4e9f1;
-  --border:rgba(47,111,176,0.15);--border2:rgba(47,111,176,0.3);
-  --text:#1a2233;--text2:#5b6b85;--text3:#8b98ac;
-  --blue:#2f6fb0;--blue-bg:rgba(47,111,176,0.08);
+  --border:rgba(52,124,190,0.15);--border2:rgba(52,124,190,0.3);
+  --text:#313d5c;--text2:#5b6b85;--text3:#8b98ac;
+  --navy:#313d5c;--navy2:#46527a;
+  --blue:#347cbe;--blue-bg:rgba(52,124,190,0.08);
+  --gold:#dfa359;--gold-bg:rgba(223,163,89,0.14);
   --green:#178a63;--green-bg:rgba(23,138,99,0.08);
   --red:#c73e3d;--red-bg:rgba(199,62,61,0.08);
-  --amber:#b9790a;--amber-bg:rgba(185,121,10,0.1);
+  --amber:#dfa359;--amber-bg:rgba(223,163,89,0.12);
   --pink:#b8305c;
   --mono:'Share Tech Mono',monospace;
   --sans:'Exo 2',sans-serif;
 }
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;min-height:100vh;
   background-image:
-    radial-gradient(ellipse at 0% 0%, rgba(47,111,176,0.04) 0%,transparent 50%),
-    radial-gradient(ellipse at 100% 100%, rgba(23,138,99,0.04) 0%,transparent 50%);
+    radial-gradient(ellipse at 0% 0%, rgba(52,124,190,0.05) 0%,transparent 50%),
+    radial-gradient(ellipse at 100% 100%, rgba(223,163,89,0.05) 0%,transparent 50%);
 }
 
 /* ── Layout ── */
 .layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh;}
 
 /* ── Sidebar ── */
-.sidebar{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:1.2rem 0;}
-.sb-logo{padding:0 1.2rem 1.5rem;border-bottom:1px solid var(--border);}
-.sb-logo-text{font-family:var(--mono);font-size:18px;letter-spacing:0.1em;}
-.sb-logo-text span{color:var(--blue);}
-.sb-logo-sub{font-size:10px;color:var(--text3);letter-spacing:0.2em;text-transform:uppercase;margin-top:4px;}
-.sb-section{padding:1rem 1.2rem 0.5rem;font-size:9px;color:var(--text3);letter-spacing:0.2em;text-transform:uppercase;}
-.sb-link{display:flex;align-items:center;gap:10px;padding:8px 1.2rem;color:var(--text2);cursor:pointer;
+.sidebar{background:var(--navy);border-right:1px solid var(--navy);display:flex;flex-direction:column;padding:1.2rem 0;}
+.sb-logo{padding:0 1.2rem 1.5rem;border-bottom:1px solid rgba(255,255,255,0.14);}
+.sb-logo-text{font-family:var(--mono);font-size:18px;letter-spacing:0.1em;color:#fff;}
+.sb-logo-text span{color:var(--gold);}
+.sb-logo-sub{font-size:10px;color:rgba(255,255,255,0.5);letter-spacing:0.2em;text-transform:uppercase;margin-top:4px;}
+.sb-section{padding:1rem 1.2rem 0.5rem;font-size:9px;color:rgba(255,255,255,0.35);letter-spacing:0.2em;text-transform:uppercase;}
+.sb-link{display:flex;align-items:center;gap:10px;padding:8px 1.2rem;color:rgba(255,255,255,0.72);cursor:pointer;
   font-size:12px;transition:all 0.15s;border-left:2px solid transparent;}
-.sb-link:hover{color:var(--text);background:var(--bg3);}
-.sb-link.active{color:var(--blue);border-left-color:var(--blue);background:var(--blue-bg);}
-.sb-link .icon{width:14px;height:14px;opacity:0.7;}
-.sb-bottom{margin-top:auto;padding:1rem 1.2rem;border-top:1px solid var(--border);}
+.sb-link:hover{color:#fff;background:rgba(255,255,255,0.07);}
+.sb-link.active{color:var(--gold);border-left-color:var(--gold);background:rgba(223,163,89,0.14);}
+.sb-link .icon{width:14px;height:14px;opacity:0.8;}
+.sb-bottom{margin-top:auto;padding:1rem 1.2rem;border-top:1px solid rgba(255,255,255,0.14);}
 .sb-user{display:flex;align-items:center;gap:8px;}
-.sb-avatar{width:28px;height:28px;border-radius:50%;background:var(--blue-bg);border:1px solid var(--border2);
-  display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--blue);font-family:var(--mono);}
-.sb-uname{font-size:12px;color:var(--text);}
-.sb-role{font-size:10px;color:var(--text3);}
-.sb-logout{display:block;margin-top:10px;font-size:11px;color:var(--text3);text-decoration:none;
-  padding:6px 10px;border:1px solid var(--border);border-radius:3px;text-align:center;transition:all 0.15s;}
-.sb-logout:hover{color:var(--red);border-color:rgba(226,75,74,0.3);}
+.sb-avatar{width:28px;height:28px;border-radius:50%;background:rgba(223,163,89,0.18);border:1px solid rgba(223,163,89,0.45);
+  display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--gold);font-family:var(--mono);}
+.sb-uname{font-size:12px;color:#fff;}
+.sb-role{font-size:10px;color:rgba(255,255,255,0.5);}
+.sb-logout{display:block;margin-top:10px;font-size:11px;color:rgba(255,255,255,0.55);text-decoration:none;
+  padding:6px 10px;border:1px solid rgba(255,255,255,0.18);border-radius:3px;text-align:center;transition:all 0.15s;}
+.sb-logout:hover{color:#ff9d9c;border-color:rgba(226,75,74,0.5);}
 
 /* ── Main area ── */
 .main{overflow:auto;}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;
-  border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:10;}
+  border-bottom:3px solid var(--gold);background:var(--bg2);position:sticky;top:0;z-index:10;}
 .page-title{font-size:14px;font-weight:600;color:var(--text);}
 .status-row{display:flex;gap:8px;}
 .badge{font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid;display:flex;align-items:center;gap:5px;font-family:var(--mono);}
@@ -76,7 +78,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13
 .tr-btn{padding:5px 12px;border-radius:3px;border:1px solid var(--border);background:var(--bg3);
   color:var(--text2);cursor:pointer;font-family:var(--mono);font-size:11px;transition:all 0.15s;}
 .tr-btn:hover{border-color:var(--border2);color:var(--text);}
-.tr-btn.active{background:var(--blue-bg);color:var(--blue);border-color:rgba(55,138,221,0.4);}
+.tr-btn.active{background:var(--blue-bg);color:var(--blue);border-color:rgba(52,124,190,0.4);}
 .tr-sep{width:1px;height:20px;background:var(--border);}
 .tr-metric-select{padding:5px 10px;border-radius:3px;border:1px solid var(--border);background:var(--bg3);
   color:var(--text);font-family:var(--mono);font-size:11px;outline:none;cursor:pointer;}
@@ -103,14 +105,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13
 .mc-delta.dn{color:var(--red);}
 
 /* ── Charts ── */
-.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+.charts-grid{display:grid;grid-template-columns:1fr;gap:1rem;margin-bottom:1rem;}
 .panel{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1rem;}
 .panel-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;}
 .panel-title{font-size:10px;color:var(--text3);letter-spacing:0.12em;text-transform:uppercase;}
 .legend{display:flex;gap:10px;flex-wrap:wrap;}
 .leg-item{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text2);font-family:var(--mono);}
 .leg-dot{width:8px;height:3px;border-radius:1px;}
-.chart-wrap{position:relative;height:180px;}
+.chart-wrap{position:relative;height:220px;}
 .chart-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   font-size:11px;color:var(--text3);font-family:var(--mono);}
 
@@ -159,13 +161,13 @@ input[type=range]:disabled{opacity:0.3;cursor:default;}
 .scn-badge::before{content:'';width:5px;height:5px;border-radius:50%;}
 .scn-badge.idle{background:var(--bg3);color:var(--text3);border-color:var(--border);}
 .scn-badge.idle::before{background:var(--text3);}
-.scn-badge.running{background:var(--blue-bg);color:var(--blue);border-color:rgba(47,111,176,0.4);}
+.scn-badge.running{background:var(--blue-bg);color:var(--blue);border-color:rgba(52,124,190,0.4);}
 .scn-badge.running::before{background:var(--blue);animation:blink 1.2s infinite;}
 .scn-badge.completed{background:var(--green-bg);color:var(--green);border-color:rgba(23,138,99,0.3);}
 .scn-badge.completed::before{background:var(--green);}
 .scn-badge.failed{background:var(--red-bg);color:var(--red);border-color:rgba(199,62,61,0.3);}
 .scn-badge.failed::before{background:var(--red);}
-.scn-badge.stopped{background:var(--amber-bg);color:var(--amber);border-color:rgba(185,121,10,0.3);}
+.scn-badge.stopped{background:var(--amber-bg);color:var(--amber);border-color:rgba(223,163,89,0.35);}
 .scn-badge.stopped::before{background:var(--amber);}
 .scn-run-meta{font-size:11px;color:var(--text3);margin-top:2px;}
 .scn-log-box{height:120px;overflow-y:auto;background:var(--bg3);border-radius:3px;padding:8px;font-family:var(--mono);font-size:11px;margin-top:0.6rem;display:none;}
@@ -637,7 +639,7 @@ function initUECharts(){
     ueCharts[ue.id] = new Chart(el, {
       type:'line',
       data:{ labels:[], datasets:[
-        {label:'DL', data:[], borderColor:'#2f6fb0', backgroundColor:'#2f6fb018', borderWidth:1.5, pointRadius:0, tension:0.4, fill:true},
+        {label:'DL', data:[], borderColor:'#347cbe', backgroundColor:'#347cbe18', borderWidth:1.5, pointRadius:0, tension:0.4, fill:true},
         {label:'UL', data:[], borderColor:'#178a63', backgroundColor:'#178a6318', borderWidth:1.5, pointRadius:0, tension:0.4, fill:true},
       ]},
       options:{
@@ -850,6 +852,23 @@ function setCustomRangeFromISO(startISO, endISO){
   applyCustomRange();
 }
 
+// Long ranges (6h/24h) combined with a fine bucket interval (5s/10s) can return
+// thousands of points per series. Re-fetching and fully re-rendering that many
+// categories on every auto-refresh tick is what makes the charts bog down and
+// visually glitch after the dashboard has been open for a while — cap the
+// rendered points so a chart never has more than MAX_CHART_POINTS categories,
+// regardless of how much data the API returns.
+const MAX_CHART_POINTS = 300;
+function downsampleTimes(times){
+  if(times.length <= MAX_CHART_POINTS) return times;
+  const step = Math.ceil(times.length / MAX_CHART_POINTS);
+  const out = [];
+  for(let i=0; i<times.length; i+=step) out.push(times[i]);
+  const last = times[times.length-1];
+  if(out[out.length-1] !== last) out.push(last);
+  return out;
+}
+
 function loadHistory(){
   if(demoActiveUes.size) return;  // don't let a real-data refresh wipe the demo overlay mid-animation
   const metric   = document.getElementById('sel-metric').value;
@@ -871,7 +890,7 @@ function loadHistory(){
     const rntis = Object.keys(series);
     if(!rntis.length){ mainChart.data.datasets=[]; mainChart.update(); return; }
     // collect all unique timestamps as labels
-    const allTimes = [...new Set(rntis.flatMap(r=>series[r].map(p=>p.t)))].sort();
+    const allTimes = downsampleTimes([...new Set(rntis.flatMap(r=>series[r].map(p=>p.t)))].sort());
     mainChart.data.labels = allTimes;
     mainChart.data.datasets = rntis.map((rnti,i)=>{
       const map = {};
@@ -910,7 +929,7 @@ function loadHistory2(){
     const series = d.series || {};
     const rntis = Object.keys(series);
     if(!rntis.length){ mainChart2.data.datasets=[]; mainChart2.update(); return; }
-    const allTimes = [...new Set(rntis.flatMap(r=>series[r].map(p=>p.t)))].sort();
+    const allTimes = downsampleTimes([...new Set(rntis.flatMap(r=>series[r].map(p=>p.t)))].sort());
     mainChart2.data.labels = allTimes;
     mainChart2.data.datasets = rntis.map((rnti,i)=>{
       const map = {};
